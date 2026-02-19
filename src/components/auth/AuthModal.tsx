@@ -265,7 +265,7 @@ export default function AuthModal() {
 
                 {/* Submit */}
                 <Button
-                  className="w-full gradient-primary glow-purple border-0 text-white font-bold h-11"
+                  className="w-full gradient-primary border-0 text-white font-bold h-11"
                   onClick={handleSubmit}
                   disabled={loading}
                 >

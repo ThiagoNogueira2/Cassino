@@ -110,7 +110,7 @@ export default function SlotsGame() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Saldo</p>
-                <p className="text-neon-gold font-black">R$ {balance.toFixed(2)}</p>
+                <p className="text-primary font-black">R$ {balance.toFixed(2)}</p>
               </div>
             </div>
 
@@ -147,7 +147,7 @@ export default function SlotsGame() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`text-center py-3 rounded-xl mb-4 ${result.win ? "bg-neon-green/20 text-neon-green" : "bg-destructive/20 text-destructive"}`}
+                    className={`text-center py-3 rounded-xl mb-4 ${result.win ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}
                   >
                     {result.win ? (
                       <p className="font-black text-lg">{result.message} · R$ {(betAmount * result.multiplier).toFixed(2)}</p>
@@ -178,7 +178,7 @@ export default function SlotsGame() {
 
               <div className="flex gap-3 mt-4">
                 <Button
-                  className="flex-1 gradient-primary border-0 text-white font-black h-12 text-base glow-purple"
+                  className="flex-1 gradient-primary border-0 text-white font-black h-12 text-base"
                   onClick={spin}
                   disabled={spinning}
                 >
@@ -190,7 +190,7 @@ export default function SlotsGame() {
                 </Button>
                 <Button
                   variant="outline"
-                  className={`border-border font-bold ${autoSpin ? "border-neon-gold text-neon-gold" : ""}`}
+                  className={`border-border font-bold ${autoSpin ? "border-primary text-primary" : ""}`}
                   onClick={() => {
                     if (autoSpin) { setAutoSpin(false); } else { setAutoCount(10); setAutoSpin(true); }
                   }}
@@ -206,10 +206,10 @@ export default function SlotsGame() {
               <p className="text-xs font-bold text-muted-foreground uppercase mb-3">Tabela de Pagamentos</p>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { combo: "💎 x5", mult: "50x", color: "text-neon-gold" },
-                  { combo: "7️⃣ x5", mult: "30x", color: "text-neon-gold" },
-                  { combo: "💎 x4", mult: "15x", color: "text-neon-green" },
-                  { combo: "Qualquer x5", mult: "10x", color: "text-neon-green" },
+                  { combo: "💎 x5", mult: "50x", color: "text-primary" },
+                  { combo: "7️⃣ x5", mult: "30x", color: "text-primary" },
+                  { combo: "💎 x4", mult: "15x", color: "text-primary" },
+                  { combo: "Qualquer x5", mult: "10x", color: "text-primary" },
                   { combo: "Qualquer x4", mult: "5x", color: "text-primary" },
                   { combo: "Qualquer x3", mult: "2x", color: "text-foreground" },
                 ].map((row) => (

@@ -118,7 +118,7 @@ export default function RouletteGame() {
                   <h1 className="text-xl font-black">🎡 Roleta Europeia</h1>
                   {phase === "betting" && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-lg">
-                      <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></div>
+                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                       <span className="text-sm font-bold">Apostas: {countdown}s</span>
                     </div>
                   )}
@@ -130,11 +130,11 @@ export default function RouletteGame() {
                     <motion.div
                       animate={{ rotate: wheelRotation }}
                       transition={{ duration: 3, ease: "easeOut" }}
-                      className="w-full h-full rounded-full border-4 border-neon-gold overflow-hidden glow-gold"
+                      className="w-full h-full rounded-full border-4 border-primary/50 overflow-hidden"
                       style={{ background: "conic-gradient(from 0deg, #dc2626 0deg, #1a1a1a 9.72deg, #dc2626 9.72deg, #1a1a1a 19.45deg, #dc2626 19.45deg, #1a1a1a 29.18deg, #dc2626 29.18deg, #1a1a1a 38.9deg, #dc2626 38.9deg, #1a1a1a 48.64deg, #dc2626 48.64deg, #1a1a1a 58.37deg, #dc2626 58.37deg, #1a1a1a 68.1deg, #dc2626 68.1deg, #1a1a1a 77.83deg, #dc2626 77.83deg, #1a1a1a 87.56deg, #dc2626 87.56deg, #1a1a1a 97.29deg, #dc2626 97.29deg, #1a1a1a 107.02deg, #dc2626 107.02deg, #1a1a1a 116.75deg, #dc2626 116.75deg, #1a1a1a 126.48deg, #dc2626 126.48deg, #1a1a1a 136.21deg, #dc2626 136.21deg, #1a1a1a 145.93deg, #dc2626 145.93deg, #1a1a1a 155.67deg, #dc2626 155.67deg, #1a1a1a 165.4deg, #dc2626 165.4deg, #1a1a1a 175.13deg, #16a34a 175.13deg, #16a34a 184.86deg, #dc2626 184.86deg, #1a1a1a 194.59deg, #dc2626 194.59deg, #1a1a1a 204.32deg, #dc2626 204.32deg, #1a1a1a 214.05deg, #dc2626 214.05deg, #1a1a1a 223.78deg, #dc2626 223.78deg, #1a1a1a 233.51deg, #dc2626 233.51deg, #1a1a1a 243.24deg, #dc2626 243.24deg, #1a1a1a 252.97deg, #dc2626 252.97deg, #1a1a1a 262.7deg, #dc2626 262.7deg, #1a1a1a 272.43deg, #dc2626 272.43deg, #1a1a1a 282.16deg, #dc2626 282.16deg, #1a1a1a 291.89deg, #dc2626 291.89deg, #1a1a1a 301.62deg, #dc2626 301.62deg, #1a1a1a 311.35deg, #dc2626 311.35deg, #1a1a1a 321.08deg, #dc2626 321.08deg, #1a1a1a 330.81deg, #dc2626 330.81deg, #1a1a1a 340.54deg, #dc2626 340.54deg, #1a1a1a 350.27deg, #dc2626 350.27deg, #1a1a1a 360deg)" }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={`w-16 h-16 rounded-full border-4 border-neon-gold flex items-center justify-center text-2xl font-black ${phase === "result" ? (getColor(result!) === "red" ? "bg-destructive" : getColor(result!) === "black" ? "bg-casino-bg" : "bg-neon-green") : "bg-casino-card"}`}>
+                      <div className={`w-16 h-16 rounded-full border-4 border-primary/50 flex items-center justify-center text-2xl font-black ${phase === "result" ? (getColor(result!) === "red" ? "bg-destructive" : getColor(result!) === "black" ? "bg-casino-bg" : "bg-primary") : "bg-casino-card"}`}>
                         {phase === "result" ? result : "?"}
                       </div>
                     </div>
@@ -142,7 +142,7 @@ export default function RouletteGame() {
                 </div>
 
                 {phase === "spinning" && (
-                  <motion.p animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 0.5, repeat: Infinity }} className="text-neon-gold font-bold mb-4">
+                  <motion.p animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 0.5, repeat: Infinity }} className="text-primary font-bold mb-4">
                     🎡 Girando...
                   </motion.p>
                 )}

@@ -13,7 +13,7 @@ export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-casino-card border-t border-border">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card border-t border-border">
       <div className="flex items-center justify-around h-16">
         {items.map(({ label, href, icon: Icon }) => {
           const active = location.pathname === href;
@@ -26,7 +26,7 @@ export default function BottomNav() {
                 active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon className={cn("w-5 h-5 transition-all", active && "drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]")} />
+              <Icon className="w-5 h-5 transition-all" />
               <span className="text-xs font-medium">{label}</span>
             </Link>
           );

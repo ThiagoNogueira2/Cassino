@@ -66,7 +66,7 @@ export default function DepositPage() {
                   <p className="text-sm font-bold mb-3">Escolha o valor</p>
                   <div className="grid grid-cols-5 gap-2 mb-4">
                     {QUICK_VALUES.map((v) => (
-                      <button key={v} onClick={() => setAmount(v)} className={`py-3 text-sm font-black rounded-xl border transition-all ${amount === v ? "bg-primary border-primary text-white glow-purple" : "bg-secondary border-border hover:border-primary/50"}`}>
+                      <button key={v} onClick={() => setAmount(v)} className={`py-3 text-sm font-black rounded-xl border transition-all ${amount === v ? "bg-primary border-primary text-black" : "bg-secondary border-border hover:border-primary/50"}`}>
                         R${v}
                       </button>
                     ))}
@@ -87,7 +87,7 @@ export default function DepositPage() {
                   </div>
                 </div>
 
-                <Button className="w-full gradient-primary border-0 text-white font-black h-12 glow-purple" onClick={handleDeposit}>
+                <Button className="w-full gradient-primary border-0 text-black font-black h-12" onClick={handleDeposit}>
                   Gerar QR Code PIX
                 </Button>
               </div>
@@ -134,7 +134,7 @@ export default function DepositPage() {
                 <p className="text-sm text-muted-foreground mb-2">R$ {Number(amount).toFixed(2)} adicionado ao seu saldo</p>
                 <p className="text-sm font-bold text-neon-gold mb-6">Novo saldo: R$ {balance.toFixed(2)}</p>
                 <div className="flex gap-3">
-                  <Link to="/games/crash" className="flex-1"><Button className="w-full gradient-primary border-0 text-white font-bold">Jogar Agora 🚀</Button></Link>
+                  <Link to="/games/crash" className="flex-1"><Button className="w-full gradient-primary border-0 text-black font-bold">Jogar Agora 🚀</Button></Link>
                   <Button variant="outline" className="border-border" onClick={() => { setStep("select"); setAmount(""); }}>Novo Depósito</Button>
                 </div>
               </div>

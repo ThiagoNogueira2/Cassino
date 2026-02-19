@@ -24,7 +24,7 @@ export default function DashboardPage() {
         <AuthModal />
         <div className="text-center">
           <p className="text-xl font-bold mb-4">Faça login para acessar o dashboard</p>
-          <Button className="gradient-primary border-0 text-white font-bold" onClick={() => openAuth("login")}>Entrar</Button>
+          <Button className="gradient-primary border-0 text-black font-bold" onClick={() => openAuth("login")}>Entrar</Button>
         </div>
         <BottomNav />
       </div>
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="card-casino rounded-2xl border border-border p-6 mb-6 bg-gradient-to-r from-primary/10 to-casino-card">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-2xl font-black text-white glow-purple">
+              <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-2xl font-black text-black">
                 {user?.avatar}
               </div>
               <div className="flex-1">
@@ -55,7 +55,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Saldo</p>
                 <p className="text-2xl font-black text-neon-gold">R$ {balance.toFixed(2)}</p>
                 <div className="flex gap-2 mt-2">
-                  <Link to="/deposit"><Button size="sm" className="gradient-primary border-0 text-white font-bold text-xs">Depositar</Button></Link>
+                  <Link to="/deposit"><Button size="sm" className="gradient-primary border-0 text-black font-bold text-xs">Depositar</Button></Link>
                   <Link to="/withdraw"><Button size="sm" variant="outline" className="border-border text-xs font-bold">Sacar</Button></Link>
                 </div>
               </div>

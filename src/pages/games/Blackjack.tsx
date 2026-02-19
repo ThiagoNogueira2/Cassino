@@ -197,7 +197,7 @@ export default function BlackjackGame() {
               <h1 className="text-xl font-black">🎴 Blackjack</h1>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Saldo</p>
-                <p className="text-neon-gold font-black">R$ {balance.toFixed(2)}</p>
+                <p className="text-primary font-black">R$ {balance.toFixed(2)}</p>
               </div>
             </div>
 
@@ -227,7 +227,7 @@ export default function BlackjackGame() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`text-center p-4 rounded-xl mx-auto max-w-sm ${resultMsg.includes("ganhou") || resultMsg.includes("BLACKJACK") ? "bg-neon-green/20 text-neon-green" : resultMsg.includes("Empate") ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}
+                    className={`text-center p-4 rounded-xl mx-auto max-w-sm ${resultMsg.includes("ganhou") || resultMsg.includes("BLACKJACK") ? "bg-primary/15 text-primary" : resultMsg.includes("Empate") ? "bg-primary/10 text-foreground" : "bg-destructive/15 text-destructive"}`}
                   >
                     <p className="font-black text-lg">{resultMsg}</p>
                   </motion.div>
@@ -249,7 +249,7 @@ export default function BlackjackGame() {
                 <p className="text-xs text-muted-foreground uppercase">
                   Você {gameState !== "idle" ? `— ${pScore} pts` : ""}
                   {pScore > 21 && <span className="text-destructive ml-2 font-bold">BUST!</span>}
-                  {pScore === 21 && playerCards.length === 2 && <span className="text-neon-gold ml-2 font-bold">BLACKJACK!</span>}
+                  {pScore === 21 && playerCards.length === 2 && <span className="text-primary ml-2 font-bold">BLACKJACK!</span>}
                 </p>
               </div>
             </div>
@@ -268,20 +268,20 @@ export default function BlackjackGame() {
                       ))}
                     </div>
                   </div>
-                  <Button className="gradient-primary border-0 text-white font-black h-10 px-6 glow-purple" onClick={startGame}>
+                  <Button className="gradient-primary border-0 text-white font-black h-10 px-6" onClick={startGame}>
                     {gameState === "finished" ? "Nova Rodada" : "Iniciar Jogo"}
                   </Button>
                 </div>
               ) : gameState === "playing" ? (
                 <div className="flex gap-3">
-                  <Button className="flex-1 gradient-primary border-0 text-white font-bold glow-purple" onClick={hit}>
+                  <Button className="flex-1 gradient-primary border-0 text-white font-bold" onClick={hit}>
                     Pedir Carta
                   </Button>
-                  <Button variant="outline" className="flex-1 border-neon-green text-neon-green hover:bg-neon-green/10 font-bold" onClick={stand}>
+                  <Button variant="outline" className="flex-1 border-primary/50 text-primary hover:bg-primary/10 font-bold" onClick={stand}>
                     Parar
                   </Button>
                   {playerCards.length === 2 && (
-                    <Button variant="outline" className="flex-1 border-neon-gold text-neon-gold hover:bg-neon-gold/10 font-bold" onClick={double}>
+                    <Button variant="outline" className="flex-1 border-primary/40 text-primary hover:bg-primary/10 font-bold" onClick={double}>
                       Dobrar
                     </Button>
                   )}
@@ -296,7 +296,7 @@ export default function BlackjackGame() {
             {/* Bet info */}
             {currentBet > 0 && (
               <div className="px-4 pb-4 text-center text-xs text-muted-foreground">
-                Aposta atual: <span className="text-neon-gold font-bold">R$ {currentBet.toFixed(2)}</span>
+                Aposta atual: <span className="text-primary font-bold">R$ {currentBet.toFixed(2)}</span>
               </div>
             )}
           </div>

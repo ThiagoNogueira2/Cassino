@@ -4,53 +4,53 @@
 
 @layer base {
   :root {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 95%;
+    --background: 355 14% 6%;
+    --foreground: 0 6% 82%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 95%;
+    --card: 355 11% 10%;
+    --card-foreground: 0 6% 82%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 355 11% 10%;
+    --popover-foreground: 0 6% 82%;
 
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 355 50% 35%;
+    --primary-foreground: 0 0% 95%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 355 10% 14%;
+    --secondary-foreground: 0 6% 70%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 355 8% 16%;
+    --muted-foreground: 0 4% 42%;
 
-    --accent: 43 96% 56%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 355 40% 28%;
+    --accent-foreground: 0 8% 90%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 25 75% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
-    --ring: 262 83% 58%;
+    --border: 355 8% 16%;
+    --input: 355 10% 14%;
+    --ring: 355 50% 35%;
 
     --radius: 0.75rem;
 
     /* Casino custom tokens */
-    --neon-purple: 262 83% 58%;
-    --neon-gold: 43 96% 56%;
-    --neon-green: 158 64% 52%;
-    --neon-red: 0 72% 51%;
-    --casino-bg: 0 0% 5%;
-    --casino-card: 0 0% 8%;
-    --casino-surface: 0 0% 11%;
+    --neon-purple: 355 50% 35%;
+    --neon-gold: 355 38% 42%;
+    --neon-green: 355 42% 32%;
+    --neon-red: 25 75% 48%;
+    --casino-bg: 355 14% 6%;
+    --casino-card: 355 11% 10%;
+    --casino-surface: 355 10% 14%;
 
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 13%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-background: 355 14% 7%;
+    --sidebar-foreground: 0 6% 78%;
+    --sidebar-primary: 355 50% 35%;
+    --sidebar-primary-foreground: 0 0% 95%;
+    --sidebar-accent: 355 10% 14%;
+    --sidebar-accent-foreground: 0 6% 78%;
+    --sidebar-border: 355 8% 16%;
+    --sidebar-ring: 355 50% 35%;
   }
 }
 
@@ -81,34 +81,40 @@
 
 @layer utilities {
   .glow-purple {
-    box-shadow: 0 0 20px hsl(var(--neon-purple) / 0.4), 0 0 40px hsl(var(--neon-purple) / 0.15);
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.15);
+  }
+  .glow-primary {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.15);
   }
   .glow-gold {
-    box-shadow: 0 0 20px hsl(var(--neon-gold) / 0.4), 0 0 40px hsl(var(--neon-gold) / 0.15);
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.12);
   }
   .glow-green {
-    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.4), 0 0 40px hsl(var(--neon-green) / 0.15);
+    box-shadow: 0 0 8px hsl(var(--neon-green) / 0.15);
   }
   .glow-red {
-    box-shadow: 0 0 20px hsl(var(--neon-red) / 0.4), 0 0 40px hsl(var(--neon-red) / 0.15);
+    box-shadow: 0 0 8px hsl(var(--neon-red) / 0.15);
   }
   .text-glow-purple {
-    text-shadow: 0 0 20px hsl(var(--neon-purple) / 0.8);
+    text-shadow: none;
   }
   .text-glow-gold {
-    text-shadow: 0 0 20px hsl(var(--neon-gold) / 0.8);
+    text-shadow: none;
   }
   .text-glow-green {
-    text-shadow: 0 0 20px hsl(var(--neon-green) / 0.8);
+    text-shadow: none;
   }
   .gradient-casino {
-    background: linear-gradient(135deg, hsl(var(--casino-bg)), hsl(262 83% 8%), hsl(var(--casino-bg)));
+    background: linear-gradient(160deg, hsl(355 14% 6%), hsl(355 14% 10%), hsl(355 14% 6%));
   }
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(262 83% 45%), hsl(262 83% 65%));
+    background: linear-gradient(135deg, hsl(355 50% 30%), hsl(355 50% 40%));
   }
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(43 96% 40%), hsl(43 96% 60%));
+    background: linear-gradient(135deg, hsl(355 42% 26%), hsl(355 42% 35%));
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(355 48% 28%), hsl(355 52% 38%));
   }
   .card-casino {
     background: hsl(var(--casino-card));
@@ -131,8 +137,8 @@
 
 /* Pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px hsl(var(--neon-purple) / 0.3); }
-  50% { box-shadow: 0 0 30px hsl(var(--neon-purple) / 0.7), 0 0 60px hsl(var(--neon-purple) / 0.3); }
+  0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.15); }
+  50% { box-shadow: 0 0 16px hsl(var(--primary) / 0.3); }
 }
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;

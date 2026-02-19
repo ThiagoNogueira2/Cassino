@@ -88,7 +88,7 @@ export default function WithdrawPage() {
                   ⚠️ Saques são processados em até 24 horas úteis. Valor mínimo R$20. Taxa: grátis via PIX.
                 </div>
 
-                <Button className="w-full gradient-primary border-0 text-white font-black h-12 glow-purple" onClick={handleWithdraw}>
+                <Button className="w-full gradient-primary border-0 text-black font-black h-12" onClick={handleWithdraw}>
                   Solicitar Saque
                 </Button>
               </div>
@@ -114,7 +114,7 @@ export default function WithdrawPage() {
                   <p className="text-xs text-muted-foreground">Status: <span className="text-neon-gold font-bold">Pendente</span> · até 24h</p>
                 </div>
                 <div className="flex gap-3">
-                  <Link to="/dashboard" className="flex-1"><Button className="w-full gradient-primary border-0 text-white font-bold">Ver Histórico</Button></Link>
+                  <Link to="/dashboard" className="flex-1"><Button className="w-full gradient-primary border-0 text-black font-bold">Ver Histórico</Button></Link>
                   <Button variant="outline" className="border-border" onClick={() => { setStep("form"); setAmount(""); setPixKey(""); }}>Novo Saque</Button>
                 </div>
               </div>

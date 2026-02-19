@@ -261,10 +261,10 @@ export default function CrashGame() {
                       key="flying"
                       className="text-center"
                     >
-                      <p className="text-neon-green text-sm font-bold mb-2 uppercase tracking-wider">
+                      <p className="text-primary text-sm font-bold mb-2 uppercase tracking-wider">
                         🚀 Em voo
                       </p>
-                      <p className={`text-7xl font-black text-neon-green text-glow-green`}>
+                      <p className={`text-7xl font-black text-primary`}>
                         {multiplier.toFixed(2)}x
                       </p>
                     </motion.div>
@@ -278,7 +278,7 @@ export default function CrashGame() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="absolute top-4 right-4 bg-neon-green text-casino-bg font-black px-4 py-2 rounded-xl text-sm"
+                      className="absolute top-4 right-4 bg-primary text-white font-black px-4 py-2 rounded-xl text-sm"
                     >
                       ✅ Saiu em {multiplier.toFixed(2)}x!
                     </motion.div>
@@ -312,7 +312,7 @@ export default function CrashGame() {
                   <div className="flex flex-col gap-2">
                     {phase === "waiting" && !activeBet ? (
                       <Button
-                        className="flex-1 gradient-primary border-0 text-white font-black glow-purple"
+                        className="flex-1 gradient-primary border-0 text-white font-black"
                         onClick={handleBet}
                         disabled={phase !== "waiting"}
                       >
@@ -320,7 +320,7 @@ export default function CrashGame() {
                       </Button>
                     ) : phase === "flying" && activeBet && !cashedOut ? (
                       <Button
-                        className="flex-1 bg-neon-green hover:bg-neon-green/90 text-casino-bg font-black glow-green border-0 text-lg animate-pulse-glow"
+                        className="flex-1 bg-primary hover:bg-primary/90 text-white font-black border-0 text-lg"
                         onClick={handleCashout}
                       >
                         💰 Retirar {multiplier.toFixed(2)}x
@@ -333,7 +333,7 @@ export default function CrashGame() {
                       </Button>
                     )}
                     <div className="text-right text-xs text-muted-foreground">
-                      Saldo: <span className="text-neon-gold font-bold">R$ {balance.toFixed(2)}</span>
+                      Saldo: <span className="text-primary font-bold">R$ {balance.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function CrashGame() {
                   {history.map((r, i) => (
                     <span
                       key={i}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-bold ${r.multiplier >= 10 ? "bg-neon-gold/20 text-neon-gold" : r.multiplier >= 2 ? "bg-neon-green/20 text-neon-green" : "bg-destructive/20 text-destructive"}`}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-bold ${r.multiplier >= 10 ? "bg-primary/20 text-primary" : r.multiplier >= 2 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}
                     >
                       {r.multiplier.toFixed(2)}x
                     </span>
@@ -359,7 +359,7 @@ export default function CrashGame() {
             <div className="card-casino rounded-2xl border border-border flex flex-col h-[500px] lg:h-auto">
               <div className="p-4 border-b border-border">
                 <p className="font-bold text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                   Chat ao Vivo
                 </p>
               </div>

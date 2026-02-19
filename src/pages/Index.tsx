@@ -62,14 +62,14 @@ function LiveCrashPreview() {
   }, [phase]);
 
   return (
-    <div className="card-casino rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/40 transition-all">
+    <div className="rounded-2xl p-6 flex flex-col items-center gap-4 bg-card/80 backdrop-blur-sm border border-border hover:border-primary/30 transition-all">
       <div className="flex items-center gap-2 self-start">
-        <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
-        <span className="text-xs font-bold text-neon-green uppercase">AO VIVO</span>
+        <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span className="text-xs font-bold text-primary uppercase">AO VIVO</span>
         <span className="text-xs text-muted-foreground">Crash</span>
       </div>
 
-      <div className={`text-6xl font-black transition-colors duration-300 ${crashed ? "text-destructive" : "text-neon-green text-glow-green"}`}>
+      <div className={`text-6xl font-black transition-colors duration-300 ${crashed ? "text-destructive" : "text-primary"}`}>
         {phase === "waiting" ? (
           <span className="text-muted-foreground text-4xl">Próxima em {countdown}s</span>
         ) : (
@@ -98,7 +98,7 @@ function LiveCrashPreview() {
       )}
 
       <Link to="/games/crash" className="w-full">
-        <Button className="w-full gradient-primary border-0 text-white font-bold glow-purple">
+        <Button className="w-full gradient-primary border-0 text-white font-bold">
           Jogar Agora <ArrowRight className="w-4 h-4" />
         </Button>
       </Link>
@@ -110,7 +110,7 @@ function LiveCrashPreview() {
           {mockCrashHistory.slice(0, 10).map((r, i) => (
             <span
               key={i}
-              className={`px-2 py-0.5 rounded text-xs font-bold ${r.multiplier >= 2 ? "bg-neon-green/20 text-neon-green" : "bg-destructive/20 text-destructive"}`}
+              className={`px-2 py-0.5 rounded text-xs font-bold ${r.multiplier >= 2 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}
             >
               {r.multiplier.toFixed(2)}x
             </span>
@@ -131,8 +131,16 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16">
-        <div className="absolute inset-0 gradient-casino" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(262_83%_20%/0.3),transparent_70%)]" />
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1596838132731-3301c3ef77e4?w=1920&h=1080&fit=crop&q=80"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
+        </div>
 
         <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-28">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -142,22 +150,22 @@ export default function HomePage() {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center gap-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
-                <span className="text-xs font-bold text-neon-green uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span className="text-xs font-bold text-primary uppercase tracking-wider">
                   🔥 1.247 jogadores online
                 </span>
               </div>
 
               <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">
                 Sinta a{" "}
-                <span className="text-neon-purple text-glow-purple">emoção</span>
+                <span className="text-primary">emoção</span>
                 <br />
-                de <span className="text-neon-gold text-glow-gold">ganhar</span>
+                de <span className="text-primary">ganhar</span>
               </h1>
 
               <p className="text-lg text-muted-foreground mb-8 max-w-md">
                 O cassino online mais completo do Brasil. Crash, Slots, Roleta e muito mais.
-                Bônus de até <strong className="text-neon-gold">R$ 500</strong> no primeiro depósito!
+                Bônus de até <strong className="text-primary">R$ 500</strong> no primeiro depósito!
               </p>
 
               <div className="flex flex-wrap gap-3">
@@ -165,7 +173,7 @@ export default function HomePage() {
                   <>
                     <Button
                       size="lg"
-                      className="gradient-primary glow-purple border-0 text-white font-black text-base px-8"
+                      className="gradient-primary border-0 text-white font-black text-base px-8"
                       onClick={() => openAuth("register")}
                     >
                       <Zap className="w-5 h-5" />
@@ -174,7 +182,7 @@ export default function HomePage() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="border-border hover:border-primary font-bold"
+                      className="border-border hover:border-primary/50 text-foreground font-bold bg-white/5 hover:bg-white/10"
                       onClick={() => openAuth("login")}
                     >
                       Entrar
@@ -182,7 +190,7 @@ export default function HomePage() {
                   </>
                 ) : (
                   <Link to="/games/crash">
-                    <Button size="lg" className="gradient-primary glow-purple border-0 text-white font-black text-base px-8">
+                    <Button size="lg" className="gradient-primary border-0 text-white font-black text-base px-8">
                       <Zap className="w-5 h-5" />
                       Jogar Agora
                     </Button>
@@ -226,7 +234,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-black">🔥 Mais Jogados</h2>
             <p className="text-sm text-muted-foreground mt-1">Os favoritos da comunidade</p>
           </div>
-          <Link to="/games/crash" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <Link to="/games/crash" className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
             Ver todos <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -255,20 +263,30 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ scale: 1.02 }}
-                className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${promo.color} p-5 border border-white/10 cursor-pointer`}
+                className="relative overflow-hidden rounded-xl h-56 cursor-pointer group"
               >
-                <div className="text-3xl mb-3">{promo.emoji}</div>
-                <div className="absolute top-4 right-4 px-3 py-1 bg-white/20 rounded-full text-sm font-black text-white backdrop-blur-sm">
-                  {promo.bonus}
+                {/* Background Image */}
+                <img
+                  src={promo.image}
+                  alt={promo.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30" />
+
+                <div className="relative z-10 p-5 h-full flex flex-col justify-end">
+                  <div className="text-3xl mb-2">{promo.emoji}</div>
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-primary/90 rounded-full text-sm font-black text-white backdrop-blur-sm">
+                    {promo.bonus}
+                  </div>
+                  <h3 className="font-bold text-foreground mb-1">{promo.title}</h3>
+                  <p className="text-xs text-muted-foreground mb-3">{promo.description}</p>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    ⏱ Expira em {promo.expiresIn}
+                  </div>
+                  <Button className="w-full mt-3 bg-white/10 hover:bg-white/20 border-0 text-foreground text-xs font-bold backdrop-blur-sm" size="sm">
+                    Resgatar
+                  </Button>
                 </div>
-                <h3 className="font-bold text-white mb-1">{promo.title}</h3>
-                <p className="text-xs text-white/70 mb-3">{promo.description}</p>
-                <div className="flex items-center gap-1 text-xs text-white/60">
-                  ⏱ Expira em {promo.expiresIn}
-                </div>
-                <Button className="w-full mt-3 bg-white/20 hover:bg-white/30 border-0 text-white text-xs font-bold backdrop-blur-sm" size="sm">
-                  Resgatar
-                </Button>
               </motion.div>
             ))}
           </div>
@@ -305,9 +323,9 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-4 p-4 rounded-xl mb-2 card-casino border border-border hover:border-primary/30 transition-all"
+                className="flex items-center gap-4 p-4 rounded-xl mb-2 bg-card border border-border hover:border-primary/20 transition-all"
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${i === 0 ? "bg-neon-gold text-casino-bg" : i === 1 ? "bg-muted-foreground/50 text-white" : i === 2 ? "bg-amber-700 text-white" : "bg-secondary text-muted-foreground"}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${i === 0 ? "bg-primary text-white" : i === 1 ? "bg-primary/60 text-white" : i === 2 ? "bg-primary/40 text-white" : "bg-secondary text-muted-foreground"}`}>
                   {player.position}
                 </div>
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-sm font-bold text-white shrink-0">
@@ -318,7 +336,7 @@ export default function HomePage() {
                   <p className="text-xs text-muted-foreground">{player.games} jogos</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-neon-green text-sm">+R$ {player.profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                  <p className="font-black text-primary text-sm">+R$ {player.profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
                   <p className="text-xs text-muted-foreground">lucro</p>
                 </div>
               </motion.div>
@@ -333,21 +351,28 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden rounded-2xl p-8 md:p-12 text-center bg-gradient-to-r from-purple-900/60 via-purple-800/40 to-purple-900/60 border border-primary/30 glow-purple"
+          className="relative overflow-hidden rounded-2xl text-center"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(262_83%_30%/0.3),transparent_70%)]" />
-          <div className="relative z-10">
+          {/* Background image */}
+          <img
+            src="https://images.unsplash.com/photo-1504279577054-acfeccf8fc52?w=1200&h=500&fit=crop&q=80"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/80 to-background/90" />
+
+          <div className="relative z-10 p-8 md:p-12">
             <div className="text-5xl mb-4">🎁</div>
             <h2 className="text-3xl font-black mb-2">Bônus Diário</h2>
             <p className="text-muted-foreground mb-6">Entre todo dia e ganhe recompensas exclusivas!</p>
             <div className="flex justify-center gap-4 mb-6">
               {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day, i) => (
-                <div key={day} className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${i < 3 ? "bg-primary text-white" : "bg-secondary border border-border text-muted-foreground"}`}>
+                <div key={day} className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${i < 3 ? "bg-primary text-white" : "bg-white/5 border border-border text-muted-foreground"}`}>
                   {day}
                 </div>
               ))}
             </div>
-            <Button className="gradient-primary border-0 text-white font-black px-8 py-3 glow-purple">
+            <Button className="gradient-primary border-0 text-white font-black px-8 py-3">
               Resgatar Bônus de Hoje
             </Button>
           </div>
