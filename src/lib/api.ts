@@ -95,15 +95,3 @@ export const api = {
         }
     },
 };
-
-// Health check para testes
-export const healthCheck = async () => {
-    try {
-        const response = await api.get("/health");
-        console.log("✅ Backend Health Check:", response);
-        return response;
-    } catch (error) {
-        console.error("❌ Backend Health Check Failed:", error);
-        throw error;
-    }
-};

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { mockBetHistory, mockTransactions, type BetHistory, type Transaction } from "@/mock/data";
+import { type BetHistory, type Transaction } from "@/mock/data";
 
 interface BalanceContextType {
   balance: number;
@@ -14,9 +14,9 @@ interface BalanceContextType {
 const BalanceContext = createContext<BalanceContextType | null>(null);
 
 export const BalanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [balance, setBalance] = useState(1250.75);
-  const [betHistory, setBetHistory] = useState<BetHistory[]>(mockBetHistory);
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const [balance, setBalance] = useState(0);
+  const [betHistory, setBetHistory] = useState<BetHistory[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const addBalance = useCallback((amount: number) => {
     setBalance((b) => b + amount);

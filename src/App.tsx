@@ -3,43 +3,71 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BalanceProvider } from "@/context/BalanceContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
-import CassinoPage from "./pages/Cassino";
-import CrashGame from "./pages/games/Crash";
-import SlotsGame from "./pages/games/Slots";
-import RouletteGame from "./pages/games/Roulette";
-import BlackjackGame from "./pages/games/Blackjack";
+import CrashGame from "./pages/games/Crash/Crash";
+import SlotsGame from "./pages/games/Slots/Slots";
+import RouletteGame from "./pages/games/Roulette/Roulette";
+import BlackjackGame from "./pages/games/Blackjack/Blackjack";
+import { motion, AnimatePresence } from "framer-motion";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  const { initializing } = useAuth();
+
+  return (
+    <>
+      <AnimatePresence>
+        {initializing && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#071423]"
+          >
+            <motion.img
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='100' height='100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230a0a0a'/%3E%3Cstop offset='100%25' stop-color='%231a1208'/%3E%3C/linearGradient%3E%3ClinearGradient id='gold' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f5d060'/%3E%3Cstop offset='40%25' stop-color='%23fff0a0'/%3E%3Cstop offset='100%25' stop-color='%23b8860b'/%3E%3C/linearGradient%3E%3ClinearGradient id='goldV' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f5d060'/%3E%3Cstop offset='50%25' stop-color='%23fff0a0'/%3E%3Cstop offset='100%25' stop-color='%23b8860b'/%3E%3C/linearGradient%3E%3CradialGradient id='glow' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%23f5d060' stop-opacity='0.3'/%3E%3Cstop offset='100%25' stop-color='%23f5d060' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='centerGlow' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%23fff0a0' stop-opacity='0.9'/%3E%3Cstop offset='100%25' stop-color='%23c9a030' stop-opacity='0.6'/%3E%3C/radialGradient%3E%3Cfilter id='gf' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeGaussianBlur stdDeviation='2' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cfilter id='softglow' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3CclipPath id='circ'%3E%3Ccircle cx='50' cy='50' r='49'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23glow)'/%3E%3Cg clip-path='url(%23circ)'%3E%3Ccircle cx='50' cy='50' r='48' fill='none' stroke='url(%23gold)' stroke-width='0.5'/%3E%3Cg stroke='url(%23gold)' stroke-width='0.4' opacity='0.5'%3E%3Cline x1='50' y1='50' x2='50' y2='4'/%3E%3Cline x1='50' y1='50' x2='91.5' y2='25'/%3E%3Cline x1='50' y1='50' x2='91.5' y2='75'/%3E%3Cline x1='50' y1='50' x2='50' y2='96'/%3E%3Cline x1='50' y1='50' x2='8.5' y2='75'/%3E%3Cline x1='50' y1='50' x2='8.5' y2='25'/%3E%3Cline x1='50' y1='50' x2='72' y2='6.5'/%3E%3Cline x1='50' y1='50' x2='93.5' y2='50'/%3E%3Cline x1='50' y1='50' x2='72' y2='93.5'/%3E%3Cline x1='50' y1='50' x2='28' y2='93.5'/%3E%3Cline x1='50' y1='50' x2='6.5' y2='50'/%3E%3Cline x1='50' y1='50' x2='28' y2='6.5'/%3E%3C/g%3E%3Cpath d='M50,50 L72,6.5 A48,48 0 0,1 91.5,25 Z' fill='%238b1a1a' opacity='0.85'/%3E%3Cpath d='M50,50 L91.5,75 A48,48 0 0,1 72,93.5 Z' fill='%238b1a1a' opacity='0.85'/%3E%3Cpath d='M50,50 L28,93.5 A48,48 0 0,1 8.5,75 Z' fill='%238b1a1a' opacity='0.85'/%3E%3Cpath d='M50,50 L8.5,25 A48,48 0 0,1 28,6.5 Z' fill='%238b1a1a' opacity='0.85'/%3E%3Cpath d='M50,50 L50,4 A48,48 0 0,1 72,6.5 Z' fill='%230f5c2e' opacity='0.9'/%3E%3Ccircle cx='50' cy='50' r='48' fill='none' stroke='url(%23gold)' stroke-width='1.2'/%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='url(%23gold)' stroke-width='0.6' opacity='0.7'/%3E%3Ccircle cx='50' cy='50' r='33' fill='url(%23bg)' opacity='0.95'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='33' fill='none' stroke='url(%23gold)' stroke-width='1'/%3E%3Cg transform='translate(32, 31) scale(0.55)' filter='url(%23softglow)'%3E%3Cpath d='M15,0 C15,0 0,10 0,20 C0,27 6,30 10,27 C8,33 5,36 0,38 L20,38 C15,36 12,33 10,27 C14,30 20,27 20,20 C20,10 15,0 15,0 Z' fill='url(%23gold)'/%3E%3C/g%3E%3Cg transform='translate(51, 30) scale(0.55)' filter='url(%23softglow)'%3E%3Cpath d='M10,5 C10,2 12,0 15,0 C18,0 20,2 20,5 C20,8 18,11 10,18 C2,11 0,8 0,5 C0,2 2,0 5,0 C8,0 10,2 10,5 Z' fill='%23c0392b'/%3E%3Cpath d='M10,18 L10,24 L9,26 L11,26 L10,24 Z' fill='%23c0392b'/%3E%3C/g%3E%3Cg transform='translate(30, 52) scale(0.55)' filter='url(%23softglow)'%3E%3Ccircle cx='10' cy='14' r='6' fill='url(%23gold)'/%3E%3Ccircle cx='18' cy='14' r='6' fill='url(%23gold)'/%3E%3Ccircle cx='14' cy='7' r='6' fill='url(%23gold)'/%3E%3Crect x='11' y='18' width='6' height='8' rx='1' fill='url(%23gold)'/%3E%3Crect x='7' y='24' width='14' height='2.5' rx='1' fill='url(%23gold)'/%3E%3C/g%3E%3Cg transform='translate(51, 51) scale(0.55)' filter='url(%23softglow)'%3E%3Cpolygon points='14,0 28,14 14,28 0,14' fill='%23c0392b'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='14' fill='%230a0a0a' stroke='url(%23gold)' stroke-width='1.2'/%3E%3Ctext x='50' y='54.5' text-anchor='middle' font-family='Georgia, serif' font-size='9.5' font-weight='bold' fill='url(%23goldV)' filter='url(%23gf)'%3E777%3C/text%3E%3Ccircle cx='50' cy='50' r='49' fill='none' stroke='url(%23gold)' stroke-width='1' opacity='0.8'/%3E%3C/svg%3E"
+              alt="Loading"
+              className="w-24 h-24"
+              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/cassino" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/deposit" element={<Deposit />} />
+          <Route path="/withdraw" element={<Withdraw />} />
+          <Route path="/games/crash" element={<CrashGame />} />
+          <Route path="/games/slots" element={<SlotsGame />} />
+          <Route path="/games/slot-machine" element={<SlotsGame />} />
+          <Route path="/games/roulette" element={<RouletteGame />} />
+          <Route path="/games/blackjack" element={<BlackjackGame />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
         <BalanceProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/cassino" element={<CassinoPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/deposit" element={<Deposit />} />
-              <Route path="/withdraw" element={<Withdraw />} />
-              <Route path="/games/crash" element={<CrashGame />} />
-              <Route path="/games/slots" element={<SlotsGame />} />
-              <Route path="/games/slot-machine" element={<SlotsGame />} />
-              <Route path="/games/roulette" element={<RouletteGame />} />
-              <Route path="/games/blackjack" element={<BlackjackGame />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <AppContent />
         </BalanceProvider>
       </AuthProvider>
     </TooltipProvider>

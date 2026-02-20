@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { type User } from "@/mock/data";
 import { api } from "@/lib/api";
 
 interface AuthContextType {
@@ -10,8 +9,10 @@ interface AuthContextType {
   closeAuth: () => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
+  updateProfile: (data: { name?: string; email?: string; avatar?: string }) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
+  initializing: boolean;
 }
 
 interface RegisterData {
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | "forgot" | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   const mapApiUserToUser = useCallback((apiUser: any): User => {
     return {
@@ -46,6 +48,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem("token");
     if (token) {
       fetchCurrentUser();
+    } else {
+      setInitializing(false);
     }
   }, []);
 
@@ -59,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Erro ao buscar usuário atual:", error);
       localStorage.removeItem("token");
       setUser(null);
+    } finally {
+      setInitializing(false);
     }
   };
 
@@ -125,13 +131,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [mapApiUserToUser]);
 
+  const updateProfile = useCallback(async (data: { name?: string; email?: string; avatar?: string }): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const response = await api.put("/users/profile", data, true);
+      
+      if (response.user) {
+        setUser(mapApiUserToUser(response.user));
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [mapApiUserToUser]);
+
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, authModal, openAuth, closeAuth, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, authModal, openAuth, closeAuth, login, register, updateProfile, logout, loading, initializing }}>
       {children}
     </AuthContext.Provider>
   );
