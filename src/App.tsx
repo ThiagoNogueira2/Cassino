@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
+import CassinoPage from "./pages/Cassino";
 import CrashGame from "./pages/games/Crash";
 import SlotsGame from "./pages/games/Slots";
 import RouletteGame from "./pages/games/Roulette";
@@ -27,6 +28,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/cassino" element={<CassinoPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/deposit" element={<Deposit />} />
               <Route path="/withdraw" element={<Withdraw />} />

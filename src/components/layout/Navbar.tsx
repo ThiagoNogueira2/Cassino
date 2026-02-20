@@ -8,7 +8,7 @@ import { useBalance } from "@/context/BalanceContext";
 
 const navLinks = [
   { label: "Início", href: "/" },
-  { label: "Jogos", href: "/games/crash" },
+  { label: "Jogos", href: "/cassino" },
   { label: "Promoções", href: "/#promotions" },
   { label: "Depositar", href: "/deposit" },
 ];

@@ -18,7 +18,7 @@ const sideGames = [
 ];
 
 const casinoLinks = [
-  { label: "Todos os Jogos", href: "/games/crash" },
+  { label: "Todos os Jogos", href: "/cassino" },
   { label: "Slots", href: "/games/slots" },
   { label: "Cassino Ao Vivo", href: "/games/roulette" },
   { label: "NeonBet Exclusivo", href: "/games/blackjack" },
@@ -65,7 +65,7 @@ export default function HomePage() {
               NeonBet
             </Link>
             <nav className="ml-8 hidden items-center gap-8 text-xs font-bold uppercase tracking-wide text-slate-300 md:flex">
-              <a className="hover:text-white" href="#cassino">Cassino</a>
+              <Link className="hover:text-white" to="/cassino">Cassino</Link>
               <a className="hover:text-white" href="#esportes">Esportes</a>
               <a className="flex items-center gap-2 hover:text-white" href="#pesquisa">
                 <Search className="h-3.5 w-3.5" /> Pesquisa
@@ -171,7 +171,9 @@ export default function HomePage() {
               <div className="relative z-10 max-w-xs">
                 <h2 className="text-5xl font-black">Cassino</h2>
                 <p className="mt-3 text-sm text-slate-200">Aproveite nossa seleção exclusiva de slots, dealers ao vivo e jogos originais.</p>
-                <Button className="mt-8 border-0 bg-[#f02254] px-8 font-black uppercase hover:bg-[#ff2a60]">Ir ao Cassino</Button>
+                <Link to="/cassino">
+                  <Button className="mt-8 border-0 bg-[#f02254] px-8 font-black uppercase hover:bg-[#ff2a60]">Ir ao Cassino</Button>
+                </Link>
               </div>
             </article>
 

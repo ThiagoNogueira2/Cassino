@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Jogos", href: "/games/crash", icon: Gamepad2 },
+  { label: "Jogos", href: "/cassino", icon: Gamepad2 },
   { label: "Carteira", href: "/deposit", icon: Wallet },
   { label: "Perfil", href: "/dashboard", icon: User },
 ];
