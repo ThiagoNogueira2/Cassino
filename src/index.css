@@ -4,53 +4,53 @@
 
 @layer base {
   :root {
-    --background: 355 14% 6%;
-    --foreground: 0 6% 82%;
+    --background: 213 62% 10%;
+    --foreground: 0 0% 96%;
 
-    --card: 355 11% 10%;
-    --card-foreground: 0 6% 82%;
+    --card: 214 56% 14%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 355 11% 10%;
-    --popover-foreground: 0 6% 82%;
+    --popover: 214 56% 14%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 355 50% 35%;
-    --primary-foreground: 0 0% 95%;
+    --primary: 345 92% 54%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 355 10% 14%;
-    --secondary-foreground: 0 6% 70%;
+    --secondary: 214 44% 18%;
+    --secondary-foreground: 213 18% 74%;
 
-    --muted: 355 8% 16%;
-    --muted-foreground: 0 4% 42%;
+    --muted: 214 33% 16%;
+    --muted-foreground: 214 14% 60%;
 
-    --accent: 355 40% 28%;
-    --accent-foreground: 0 8% 90%;
+    --accent: 214 40% 22%;
+    --accent-foreground: 0 0% 96%;
 
-    --destructive: 25 75% 48%;
+    --destructive: 0 82% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 355 8% 16%;
-    --input: 355 10% 14%;
-    --ring: 355 50% 35%;
+    --border: 214 35% 23%;
+    --input: 214 44% 18%;
+    --ring: 345 92% 54%;
 
     --radius: 0.75rem;
 
     /* Casino custom tokens */
-    --neon-purple: 355 50% 35%;
-    --neon-gold: 355 38% 42%;
-    --neon-green: 355 42% 32%;
-    --neon-red: 25 75% 48%;
-    --casino-bg: 355 14% 6%;
-    --casino-card: 355 11% 10%;
-    --casino-surface: 355 10% 14%;
+    --neon-purple: 345 92% 54%;
+    --neon-gold: 40 92% 59%;
+    --neon-green: 156 66% 44%;
+    --neon-red: 0 82% 58%;
+    --casino-bg: 213 62% 10%;
+    --casino-card: 214 56% 14%;
+    --casino-surface: 214 44% 18%;
 
-    --sidebar-background: 355 14% 7%;
-    --sidebar-foreground: 0 6% 78%;
-    --sidebar-primary: 355 50% 35%;
-    --sidebar-primary-foreground: 0 0% 95%;
-    --sidebar-accent: 355 10% 14%;
-    --sidebar-accent-foreground: 0 6% 78%;
-    --sidebar-border: 355 8% 16%;
-    --sidebar-ring: 355 50% 35%;
+    --sidebar-background: 213 60% 11%;
+    --sidebar-foreground: 213 14% 82%;
+    --sidebar-primary: 345 92% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 44% 18%;
+    --sidebar-accent-foreground: 213 14% 82%;
+    --sidebar-border: 214 35% 23%;
+    --sidebar-ring: 345 92% 54%;
   }
 }
 
@@ -105,16 +105,16 @@
     text-shadow: none;
   }
   .gradient-casino {
-    background: linear-gradient(160deg, hsl(355 14% 6%), hsl(355 14% 10%), hsl(355 14% 6%));
+    background: linear-gradient(160deg, hsl(213 62% 10%), hsl(214 56% 14%), hsl(213 62% 10%));
   }
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(355 50% 30%), hsl(355 50% 40%));
+    background: linear-gradient(135deg, hsl(345 95% 48%), hsl(345 92% 58%));
   }
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(355 42% 26%), hsl(355 42% 35%));
+    background: linear-gradient(135deg, hsl(40 90% 48%), hsl(40 92% 59%));
   }
   .gradient-warm {
-    background: linear-gradient(135deg, hsl(355 48% 28%), hsl(355 52% 38%));
+    background: linear-gradient(135deg, hsl(210 55% 20%), hsl(214 58% 28%));
   }
   .card-casino {
     background: hsl(var(--casino-card));

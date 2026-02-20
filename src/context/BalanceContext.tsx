@@ -23,12 +23,16 @@ export const BalanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const subtractBalance = useCallback((amount: number): boolean => {
+    let hasEnoughBalance = true;
     setBalance((b) => {
-      if (b < amount) return b;
+      if (b < amount) {
+        hasEnoughBalance = false;
+        return b;
+      }
       return b - amount;
     });
-    return balance >= amount;
-  }, [balance]);
+    return hasEnoughBalance;
+  }, []);
 
   const addBet = useCallback((bet: Omit<BetHistory, "id" | "date">) => {
     const newBet: BetHistory = {

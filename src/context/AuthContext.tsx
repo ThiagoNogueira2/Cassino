@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { mockUser, type User } from "@/mock/data";
+import { type User } from "@/mock/data";
 import { api } from "@/lib/api";
 
 interface AuthContextType {
@@ -21,23 +21,25 @@ interface RegisterData {
   password: string;
 }
 
-interface ApiUser {
-  id: number;
-  name: string;
-  email: string;
-  cpf: string;
-  avatar: string | null;
-  balance: number;
-  level: string;
-  joinedAt: string;
-}
-
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | "forgot" | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const mapApiUserToUser = useCallback((apiUser: any): User => {
+    return {
+      id: String(apiUser.id),
+      name: apiUser.name,
+      email: apiUser.email,
+      cpf: apiUser.cpf,
+      avatar: apiUser.avatar ?? "NB",
+      balance: Number(apiUser.balance ?? 0),
+      level: apiUser.level ?? "VIP Silver",
+      joinedAt: apiUser.joinedAt ?? "",
+    };
+  }, []);
 
   // Carregar usuário ao iniciar se houver token salvo
   useEffect(() => {
@@ -51,15 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await api.get("/auth/me", true);
       if (response.user) {
-        setUser({
-          id: response.user.id,
-          name: response.user.name,
-          email: response.user.email,
-          cpf: response.user.cpf,
-          avatar: response.user.avatar,
-          balance: response.user.balance,
-          level: response.user.level,
-        });
+        setUser(mapApiUserToUser(response.user));
       }
     } catch (error) {
       console.error("Erro ao buscar usuário atual:", error);
@@ -86,15 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Buscar dados do usuário após login
         if (response.user) {
-          setUser({
-            id: response.user.id,
-            name: response.user.name,
-            email: response.user.email,
-            cpf: response.user.cpf,
-            avatar: response.user.avatar,
-            balance: response.user.balance,
-            level: response.user.level,
-          });
+          setUser(mapApiUserToUser(response.user));
         }
         
         setAuthModal(null);
@@ -107,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mapApiUserToUser]);
 
   const register = useCallback(async (data: RegisterData): Promise<boolean> => {
     setLoading(true);
@@ -124,15 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Buscar dados do usuário após registro
         if (response.user) {
-          setUser({
-            id: response.user.id,
-            name: response.user.name,
-            email: response.user.email,
-            cpf: response.user.cpf,
-            avatar: response.user.avatar,
-            balance: response.user.balance,
-            level: response.user.level,
-          });
+          setUser(mapApiUserToUser(response.user));
         }
         
         setAuthModal(null);
@@ -145,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mapApiUserToUser]);
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
