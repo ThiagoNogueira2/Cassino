@@ -16,11 +16,12 @@ function formatCPF(value: string) {
 }
 
 export default function AuthModal() {
-  const { authModal, closeAuth, openAuth, login, register } = useAuth();
+  const { authModal, closeAuth, openAuth, login, register, loading: authLoading } = useAuth();
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string>("");
 
   // Login state
   const [loginEmail, setLoginEmail] = useState("");
@@ -58,17 +59,27 @@ export default function AuthModal() {
   };
 
   const handleSubmit = async () => {
+    setApiError("");
     if (!validate()) return;
     setLoading(true);
     try {
       if (authModal === "login") {
-        await login(loginEmail, loginPassword);
+        const success = await login(loginEmail, loginPassword);
+        if (!success) {
+          setApiError("Email ou senha inválidos");
+        }
       } else if (authModal === "register") {
-        await register({ name: regName, email: regEmail, cpf: regCPF, password: regPassword });
+        const success = await register({ name: regName, email: regEmail, cpf: regCPF, password: regPassword });
+        if (!success) {
+          setApiError("Erro ao criar conta. Verifique seus dados e tente novamente.");
+        }
       } else if (authModal === "forgot") {
         await new Promise((r) => setTimeout(r, 1000));
         setSuccess(true);
       }
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      setApiError(error?.data?.message || "Erro ao processar sua solicitação");
     } finally {
       setLoading(false);
     }
@@ -132,6 +143,12 @@ export default function AuthModal() {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* API Error */}
+                {apiError && (
+                  <div className="p-3 rounded-lg bg-destructive/20 border border-destructive/50 text-destructive text-sm">
+                    {apiError}
+                  </div>
+                )}
                 {/* Register: Name */}
                 {authModal === "register" && (
                   <div>
@@ -267,9 +284,9 @@ export default function AuthModal() {
                 <Button
                   className="w-full gradient-primary border-0 text-white font-bold h-11"
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={loading || authLoading}
                 >
-                  {loading ? (
+                  {loading || authLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     titles[authModal]
