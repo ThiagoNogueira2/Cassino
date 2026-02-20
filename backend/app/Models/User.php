@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'avatar',
         'balance',
         'level',
+        'role',
     ];
 
     /**
@@ -62,6 +64,7 @@ class User extends Authenticatable
             'avatar' => $this->avatar,
             'balance' => (float) $this->balance,
             'level' => $this->level,
+            'role' => $this->role,
             'joinedAt' => $this->created_at->toIso8601String(),
         ];
     }

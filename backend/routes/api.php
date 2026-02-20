@@ -20,7 +20,7 @@ use App\Http\Controllers\Auth\UserController;
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
-        'message' => 'Velvet Stake Hub API is running!',
+        'message' => 'Sistema de Cassino funcionando!',
         'timestamp' => now(),
     ]);
 });
@@ -45,6 +45,14 @@ Route::middleware('auth:sanctum')->prefix('users')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'updateProfile']);
     Route::put('/change-password', [UserController::class, 'changePassword']);
+});
+
+// Admin routes
+Route::middleware('auth:sanctum', 'admin')->prefix('admin/users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
 // Fallback for backward compatibility

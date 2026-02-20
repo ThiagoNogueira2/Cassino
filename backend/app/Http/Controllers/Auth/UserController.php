@@ -67,4 +67,85 @@ class UserController extends Controller
             'message' => 'Password changed successfully',
         ], 200);
     }
+
+    /**
+     * List all users (Admin only)
+     */
+    public function index()
+    {
+        $users = \App\Models\User::all();
+
+        return response()->json([
+            'data' => $users->map(fn($user) => $user->toApiArray()),
+            'total' => $users->count(),
+        ], 200);
+    }
+
+    /**
+     * Get user by ID (Admin only)
+     */
+    public function show($id)
+    {
+        $user = \App\Models\User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'user' => $user->toApiArray(),
+        ], 200);
+    }
+
+    /**
+     * Update user (Admin only)
+     */
+    public function update(Request $request, $id)
+    {
+        $user = \App\Models\User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|unique:users,email,' . $id,
+            'avatar' => 'sometimes|string|nullable',
+            'balance' => 'sometimes|numeric|min:0',
+            'level' => 'sometimes|string|max:255',
+            'role' => 'sometimes|in:user,admin',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user->toApiArray(),
+        ], 200);
+    }
+
+    /**
+     * Delete user (Admin only)
+     */
+    public function destroy($id)
+    {
+        $user = \App\Models\User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User deleted successfully',
+        ], 200);
+    }
 }
