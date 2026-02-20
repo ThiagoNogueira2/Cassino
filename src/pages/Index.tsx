@@ -12,7 +12,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNav from "@/components/layout/BottomNav";
 import AuthModal from "@/components/auth/AuthModal";
-import { ApiHealthTest } from "@/components/ApiHealthTest";
 
 // Live crash multiplier preview
 function LiveCrashPreview() {
@@ -379,12 +378,7 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
-      {/* API Health Test */}
-      <section className="bg-slate-900 border-b border-slate-800 py-4">
-        <div className="max-w-7xl mx-auto px-4">
-          <ApiHealthTest />
-        </div>
-      </section>
+
       <Footer />
       <BottomNav />
     </div>
