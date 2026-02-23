@@ -56,17 +56,16 @@ export default function RouletteGame() {
     // Calculate wins
     let totalWin = 0;
     bets.forEach((bet) => {
-      let won = false;
       const color = getColor(num);
-      if (bet.type === "number" && bet.value === num) { won = true; totalWin += bet.amount * 35; }
-      else if (bet.type === "red" && color === "red") { won = true; totalWin += bet.amount * 2; }
-      else if (bet.type === "black" && color === "black") { won = true; totalWin += bet.amount * 2; }
-      else if (bet.type === "even" && num !== 0 && num % 2 === 0) { won = true; totalWin += bet.amount * 2; }
-      else if (bet.type === "odd" && num % 2 !== 0) { won = true; totalWin += bet.amount * 2; }
-      else if (bet.type === "low" && num >= 1 && num <= 18) { won = true; totalWin += bet.amount * 2; }
-      else if (bet.type === "high" && num >= 19) { won = true; totalWin += bet.amount * 2; }
-      if (won) addBalance(totalWin);
+      if (bet.type === "number" && bet.value === num) totalWin += bet.amount * 35;
+      else if (bet.type === "red" && color === "red") totalWin += bet.amount * 2;
+      else if (bet.type === "black" && color === "black") totalWin += bet.amount * 2;
+      else if (bet.type === "even" && num !== 0 && num % 2 === 0) totalWin += bet.amount * 2;
+      else if (bet.type === "odd" && num % 2 !== 0) totalWin += bet.amount * 2;
+      else if (bet.type === "low" && num >= 1 && num <= 18) totalWin += bet.amount * 2;
+      else if (bet.type === "high" && num >= 19) totalWin += bet.amount * 2;
     });
+    if (totalWin > 0) addBalance(totalWin);
 
     const totalBet = bets.reduce((s, b) => s + b.amount, 0);
     if (totalBet > 0) {

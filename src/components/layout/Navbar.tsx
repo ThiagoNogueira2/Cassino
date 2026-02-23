@@ -13,12 +13,18 @@ const navLinks = [
   { label: "Depositar", href: "/deposit" },
 ];
 
+const adminNavLinks = [
+  { label: "Painel Admin", href: "/admin" },
+  { label: "Usuários", href: "/admin/users" },
+];
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, isLoggedIn, openAuth, logout } = useAuth();
+  const { user, isLoggedIn, isAdmin, openAuth, logout } = useAuth();
   const { balance } = useBalance();
   const navigate = useNavigate();
+  const links = isAdmin ? adminNavLinks : navLinks;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
@@ -35,7 +41,7 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               to={link.href}
@@ -132,7 +138,7 @@ export default function Navbar() {
             className="md:hidden border-t border-border bg-background overflow-hidden"
           >
             <div className="p-4 space-y-1">
-              {navLinks.map((link) => (
+              {links.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}

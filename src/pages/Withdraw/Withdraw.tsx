@@ -32,7 +32,6 @@ export default function WithdrawPage() {
     subtractBalance(Number(amount));
     addTransaction({ type: "withdraw", amount: Number(amount), status: "pending", description: `Saque PIX para ${pixKey}` });
     setStep("processing");
-
     setTimeout(() => setStep("done"), 3000);
   };
 

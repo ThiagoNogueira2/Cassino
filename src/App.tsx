@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BalanceProvider } from "@/context/BalanceContext";
 import Index from "./pages/Index";
@@ -10,16 +10,39 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminUsers from "./pages/Admin/AdminUsers";
 import CrashGame from "./pages/games/Crash/Crash";
 import SlotsGame from "./pages/games/Slots/Slots";
 import RouletteGame from "./pages/games/Roulette/Roulette";
 import BlackjackGame from "./pages/games/Blackjack/Blackjack";
 import { motion, AnimatePresence } from "framer-motion";
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isAdmin, initializing } = useAuth();
+  if (initializing) return null;
+  if (!isLoggedIn || !isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function IndexOrAdmin() {
+  const { isAdmin, initializing } = useAuth();
+  if (initializing) return null;
+  if (isAdmin) return <Navigate to="/admin" replace />;
+  return <Index />;
+}
+
+function GameOrRedirect({ children }: { children: React.ReactNode }) {
+  const { isAdmin, initializing } = useAuth();
+  if (initializing) return null;
+  if (isAdmin) return <Navigate to="/admin" replace />;
+  return <>{children}</>;
+}
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { initializing } = useAuth();
+  const { initializing, loggingOut } = useAuth();
 
   return (
     <>
@@ -40,21 +63,39 @@ const AppContent = () => {
             />
           </motion.div>
         )}
+        {loggingOut && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 bg-[#071423]"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-14 h-14 rounded-full border-2 border-primary/30 border-t-primary"
+            />
+            <p className="text-lg font-semibold text-muted-foreground">Saindo...</p>
+          </motion.div>
+        )}
       </AnimatePresence>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cassino" element={<Index />} />
+          <Route path="/" element={<IndexOrAdmin />} />
+          <Route path="/cassino" element={<IndexOrAdmin />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/deposit" element={<Deposit />} />
           <Route path="/withdraw" element={<Withdraw />} />
-          <Route path="/games/crash" element={<CrashGame />} />
-          <Route path="/games/slots" element={<SlotsGame />} />
-          <Route path="/games/slot-machine" element={<SlotsGame />} />
-          <Route path="/games/roulette" element={<RouletteGame />} />
-          <Route path="/games/blackjack" element={<BlackjackGame />} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+          <Route path="/games/crash" element={<GameOrRedirect><CrashGame /></GameOrRedirect>} />
+          <Route path="/games/slots" element={<GameOrRedirect><SlotsGame /></GameOrRedirect>} />
+          <Route path="/games/slot-machine" element={<GameOrRedirect><SlotsGame /></GameOrRedirect>} />
+          <Route path="/games/roulette" element={<GameOrRedirect><RouletteGame /></GameOrRedirect>} />
+          <Route path="/games/blackjack" element={<GameOrRedirect><BlackjackGame /></GameOrRedirect>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

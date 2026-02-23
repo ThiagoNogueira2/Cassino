@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { type BetHistory, type Transaction } from "@/mock/data";
+import { useAuth } from "@/context/AuthContext";
 
 interface BalanceContextType {
   balance: number;
@@ -14,9 +15,23 @@ interface BalanceContextType {
 const BalanceContext = createContext<BalanceContextType | null>(null);
 
 export const BalanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [balance, setBalance] = useState(0);
   const [betHistory, setBetHistory] = useState<BetHistory[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const lastUserId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (user == null) {
+      setBalance(0);
+      lastUserId.current = null;
+      return;
+    }
+    if (lastUserId.current !== user.id) {
+      lastUserId.current = user.id;
+      setBalance(Number(user.balance ?? 0));
+    }
+  }, [user?.id]);
 
   const addBalance = useCallback((amount: number) => {
     setBalance((b) => b + amount);

@@ -76,6 +76,26 @@ export const api = {
         }
     },
 
+    async patch(endpoint: string, data: any, withAuth: boolean = false) {
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: "PATCH",
+                headers: getHeaders(withAuth),
+                body: JSON.stringify(data),
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw { status: response.status, data: error };
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error(`API PATCH error: ${endpoint}`, error);
+            throw error;
+        }
+    },
+
     async delete(endpoint: string, withAuth: boolean = false) {
         try {
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search, Clock3, Bomb, Rocket, Dice4, Sailboat, Building2, ChartNoAxesColumn, Goal, CircleDot, Wallet, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -51,16 +51,23 @@ const sponsorCards = [
 ];
 
 export default function HomePage() {
-  const { user, isLoggedIn, openAuth, logout, initializing } = useAuth();
+  const { user, isLoggedIn, isAdmin, openAuth, logout, initializing } = useAuth();
   const { balance } = useBalance();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showCasinoGames, setShowCasinoGames] = useState(location.pathname === "/cassino");
 
   useEffect(() => {
+    if (!initializing && isAdmin) {
+      navigate("/admin", { replace: true });
+      return;
+    }
     if (location.pathname === "/cassino") {
       setShowCasinoGames(true);
     }
-  }, [location.pathname]);
+  }, [initializing, isAdmin, location.pathname, navigate]);
+
+  if (!initializing && isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-[#071423] text-white">

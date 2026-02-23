@@ -18,7 +18,7 @@ export default function DepositPage() {
   const [step, setStep] = useState<DepositStep>("select");
   const [copied, setCopied] = useState(false);
 
-  const { addBalance, addTransaction, balance } = useBalance();
+  const { balance, addBalance, addTransaction } = useBalance();
   const { isLoggedIn, openAuth } = useAuth();
   const { toast } = useToast();
 

@@ -60,10 +60,10 @@ export default function CrashGame() {
             setCrashed(true);
             setPhase("crashed");
 
-            // If player had active bet and didn't cash out
+           
             setActiveBet((bet) => {
               if (bet !== null) {
-                toast({ title: "💥 Crash!", description: `A rodada crashou em ${next.toFixed(2)}x. Você perdeu R$ ${bet.toFixed(2)}`, variant: "destructive" });
+                toast({ title: "Crash!", description: `A rodada crashou em ${next.toFixed(2)}x. Você perdeu R$ ${bet.toFixed(2)}`, variant: "destructive" });
                 addBet({ game: "Crash", betAmount: bet, result: 0, profit: -bet, outcome: "loss" });
               }
               return null;
@@ -94,7 +94,7 @@ export default function CrashGame() {
     if (phase !== "waiting") { toast({ title: "Aguarde a próxima rodada", variant: "destructive" }); return; }
     subtractBalance(amount);
     setActiveBet(amount);
-    toast({ title: "✅ Aposta registrada!", description: `R$ ${amount.toFixed(2)} apostado` });
+    toast({ title: "Aposta registrada!", description: `R$ ${amount.toFixed(2)} apostado` });
   };
 
   const handleCashout = () => {
@@ -105,7 +105,7 @@ export default function CrashGame() {
     addBet({ game: "Crash", betAmount: activeBet, result: multiplier, profit: winAmount - activeBet, outcome: "win" });
     setCashedOut(true);
     setActiveBet(null);
-    toast({ title: `🚀 Cashout! ${multiplier.toFixed(2)}x`, description: `Você ganhou R$ ${winAmount.toFixed(2)}!` });
+    toast({ title: `Cashout! ${multiplier.toFixed(2)}x`, description: `Você ganhou R$ ${winAmount.toFixed(2)}!` });
   };
 
   const sendChat = () => {
@@ -124,22 +124,22 @@ export default function CrashGame() {
 
       <div className="pt-16 pb-20 md:pb-4">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* Back */}
+        
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
 
           <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-            {/* Main Game Area */}
+          
             <div className="space-y-4">
-              {/* Game canvas */}
+             
               <div className="relative card-casino rounded-2xl border border-border overflow-hidden" style={{ minHeight: 340 }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-casino-bg to-casino-card" />
                 <div className="absolute inset-0 p-4">
                   <CrashCanvas multiplier={multiplier} crashed={crashed} phase={phase} />
                 </div>
 
-                {/* Multiplier overlay */}
+              
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   {phase === "waiting" ? (
                     <motion.div
@@ -176,7 +176,7 @@ export default function CrashGame() {
                   )}
                 </div>
 
-                {/* Cashout success overlay */}
+              
                 <AnimatePresence>
                   {cashedOut && (
                     <motion.div
@@ -185,13 +185,13 @@ export default function CrashGame() {
                       exit={{ opacity: 0 }}
                       className="absolute top-4 right-4 bg-primary text-white font-black px-4 py-2 rounded-xl text-sm"
                     >
-                      ✅ Saiu em {multiplier.toFixed(2)}x!
+                      Saiu em {multiplier.toFixed(2)}x!
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Bet controls */}
+           
               <div className="card-casino rounded-2xl border border-border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -221,14 +221,14 @@ export default function CrashGame() {
                         onClick={handleBet}
                         disabled={phase !== "waiting"}
                       >
-                        🚀 Apostar R$ {parseFloat(betAmount || "0").toFixed(2)}
+                        Apostar R$ {parseFloat(betAmount || "0").toFixed(2)}
                       </Button>
                     ) : phase === "flying" && activeBet && !cashedOut ? (
                       <Button
                         className="flex-1 bg-primary hover:bg-primary/90 text-white font-black border-0 text-lg"
                         onClick={handleCashout}
                       >
-                        💰 Retirar {multiplier.toFixed(2)}x
+                        Retirar {multiplier.toFixed(2)}x
                         <br />
                         <span className="text-sm">≈ R$ {(activeBet * multiplier).toFixed(2)}</span>
                       </Button>
@@ -244,7 +244,6 @@ export default function CrashGame() {
                 </div>
               </div>
 
-              {/* Round history */}
               <div className="card-casino rounded-2xl border border-border p-4">
                 <p className="text-xs font-bold text-muted-foreground uppercase mb-3">Histórico de rodadas</p>
                 <div className="flex flex-wrap gap-2">
@@ -260,7 +259,7 @@ export default function CrashGame() {
               </div>
             </div>
 
-            {/* Sidebar: Chat */}
+      
             <div className="card-casino rounded-2xl border border-border flex flex-col h-[500px] lg:h-auto">
               <div className="p-4 border-b border-border">
                 <p className="font-bold text-sm flex items-center gap-2">
