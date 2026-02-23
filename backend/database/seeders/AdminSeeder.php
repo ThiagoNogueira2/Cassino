@@ -14,19 +14,25 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@cassino.com',
             'cpf' => '00000000001',
             'password' => Hash::make('admin123456'),
             'avatar' => null,
-            'balance' => 0,
+            'balance' => 10000.00,
             'level' => 'VIP Diamond',
             'role' => 'admin',
         ]);
 
+        // Sync wallet balance with user balance
+        if ($admin->wallet) {
+            $admin->wallet->update(['balance' => $admin->balance]);
+        }
+
         echo "\n✅ Admin criado com sucesso!\n";
         echo "Email: admin@cassino.com\n";
-        echo "Senha: admin123456\n\n";
+        echo "Senha: admin123456\n";
+        echo "Saldo: R$ 10.000,00\n\n";
     }
 }

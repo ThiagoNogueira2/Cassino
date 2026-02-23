@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('deposits', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->decimal('amount', 15, 2);
+            $table->string('pix_code');
+            $table->longText('qr_code_base64')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('approved');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
+            $table->index('user_id');
+            $table->index('status');
         });
     }
 

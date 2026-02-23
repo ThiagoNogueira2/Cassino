@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,6 +52,30 @@ class User extends Authenticatable
         'password' => 'hashed',
         'balance' => 'decimal:2',
     ];
+
+    /**
+     * Get the wallet associated with the user.
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Get the deposits for the user.
+     */
+    public function deposits(): HasMany
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
+    /**
+     * Get the withdrawals for the user.
+     */
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
 
     /**
      * Get user data formatted for API responses
