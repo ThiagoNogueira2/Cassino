@@ -441,6 +441,84 @@ Authorization: Bearer {admin_token}
 
 ---
 
+## Carteira
+
+### GET `/api/wallet/balance`
+Retorna o saldo atual
+
+**Resposta (200):**
+```json
+{
+    "balance": 10100.5,
+    "currency": "BRL"
+}
+```
+
+### Depósito
+#### POST	/api/wallet/deposit
+Cria depósito PIX (gera QR code / copia-cola)	{ amount }
+
+**Resposta (201):**
+```json
+{
+    "id": "3",
+    "amount": 100.5,
+    "pixCode": "PIX-aHuxsgjX2Ojma9Ab-1771856176",
+    "qrCodeBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgMzAwIDMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IndoaXRlIi8+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNTAiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCI+CiAgICBQSVgtYUh1eHNnalgyT2ptYTlBYi0xNzcxODU2MTc2CiAgPC90ZXh0Pgo8L3N2Zz4=",
+    "status": "approved",
+    "expiresAt": "2026-02-23T14:46:16+00:00"
+}
+```
+
+
+#### GET	/api/wallet/deposit/:id/status
+Verifica status do depósito(depositId)
+
+**Resposta (200):**
+```json
+{
+    "id": "3",
+    "amount": 100.5,
+    "pixCode": "PIX-aHuxsgjX2Ojma9Ab-1771856176",
+    "qrCodeBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgMzAwIDMwMCI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IndoaXRlIi8+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjI4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMTUwIiB5PSIxNTAiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCI+CiAgICBQSVgtYUh1eHNnalgyT2ptYTlBYi0xNzcxODU2MTc2CiAgPC90ZXh0Pgo8L3N2Zz4=",
+    "status": "approved",
+    "expiresAt": "2026-02-23T14:46:16+00:00"
+}
+```
+
+### Saque
+#### POST	/api/wallet/withdraw
+Solicita saque PIX { amount, pixKeyType, pixKey }
+
+**Resposta (201):**
+```json
+{
+    "id": "1",
+    "amount": 100.1,
+    "pixKeyType": "cpf",
+    "pixKey": "000.000.000-01",
+    "status": "approved",
+    "createdAt": "2026-02-23T13:52:15+00:00"
+}
+```
+
+#### GET	/api/wallet/withdraw/:id/status
+Verifica status do saque (withdrawId)
+
+**Resposta (200):**
+```json
+{
+    "id": "1",
+    "amount": 100.1,
+    "pixKeyType": "cpf",
+    "pixKey": "000.000.000-01",
+    "status": "approved",
+    "createdAt": "2026-02-23T13:52:15+00:00"
+}
+```
+
+---
+
 ## Dados de Teste
 
 ### Admin
