@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Wallet;
 use App\Models\Deposit;
 use App\Models\Withdrawal;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -68,6 +69,15 @@ class WalletController extends Controller
             'expires_at' => now()->addMinutes(30),
         ]);
 
+        // Create transaction record
+        Transaction::create([
+            'user_id' => $user->id,
+            'type' => 'deposit',
+            'amount' => $validated['amount'],
+            'status' => 'approved',
+            'description' => "Depósito PIX - {$pixCode}",
+        ]);
+
         // Update wallet balance
         $wallet->balance += $validated['amount'];
         $wallet->save();
@@ -126,6 +136,15 @@ class WalletController extends Controller
             'pix_key_type' => $validated['pix_key_type'],
             'pix_key' => $validated['pix_key'],
             'status' => 'approved',
+        ]);
+
+        // Create transaction record
+        Transaction::create([
+            'user_id' => $user->id,
+            'type' => 'withdraw',
+            'amount' => $validated['amount'],
+            'status' => 'approved',
+            'description' => "Saque PIX - {$validated['pix_key_type']}: {$validated['pix_key']}",
         ]);
 
         // Update wallet balance

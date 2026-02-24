@@ -78,6 +78,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the transactions for the user.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
      * Get user data formatted for API responses
      */
     public function toApiArray(): array

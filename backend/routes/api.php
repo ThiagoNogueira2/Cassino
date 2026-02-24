@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,15 @@ Route::middleware('auth:sanctum')->prefix('wallet')->group(function () {
     Route::get('/deposit/{id}/status', [WalletController::class, 'depositStatus']);
     Route::post('/withdraw', [WalletController::class, 'withdraw']);
     Route::get('/withdraw/{id}/status', [WalletController::class, 'withdrawalStatus']);
+});
+
+// Transaction routes
+Route::middleware('auth:sanctum')->prefix('transactions')->group(function () {
+    Route::get('/', [TransactionController::class, 'index']);
+    Route::get('/{id}', [TransactionController::class, 'show']);
+    Route::post('/', [TransactionController::class, 'store']);
+    Route::put('/{id}', [TransactionController::class, 'update']);
+    Route::delete('/{id}', [TransactionController::class, 'destroy']);
 });
 
 // Fallback for backward compatibility

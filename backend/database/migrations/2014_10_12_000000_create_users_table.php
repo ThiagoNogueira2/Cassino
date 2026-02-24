@@ -21,8 +21,10 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->decimal('balance', 15, 2)->default(0);
             $table->string('level')->default('VIP Silver');
+            $table->enum('role', ['user', 'admin'])->default('user')->after('level');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
