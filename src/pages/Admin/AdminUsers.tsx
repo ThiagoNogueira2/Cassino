@@ -506,7 +506,6 @@ export default function AdminUsers() {
         </DialogContent>
       </Dialog>
 
-      {/* AlertDialog Excluir */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent className="border-white/10 bg-[#0d2239] text-white">
           <AlertDialogHeader>

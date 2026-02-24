@@ -10,6 +10,7 @@ import AuthModal from "@/components/auth/AuthModal";
 import { useBalance } from "@/context/BalanceContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { wallet } from "@/lib/api";
 import type { PixKeyType, WithdrawStep } from "./types";
 import { QUICK_WITHDRAW_VALUES, MIN_WITHDRAW_AMOUNT } from "./constants";
 
@@ -19,20 +20,24 @@ export default function WithdrawPage() {
   const [pixType, setPixType] = useState<PixKeyType>("cpf");
   const [step, setStep] = useState<WithdrawStep>("form");
 
-  const { balance, subtractBalance, addTransaction } = useBalance();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { balance, addTransaction } = useBalance();
+  const { isLoggedIn, openAuth, refreshUser } = useAuth();
   const { toast } = useToast();
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!isLoggedIn) { openAuth("login"); return; }
     if (!amount || Number(amount) < MIN_WITHDRAW_AMOUNT) { toast({ title: `Mínimo R$${MIN_WITHDRAW_AMOUNT}`, variant: "destructive" }); return; }
     if (Number(amount) > balance) { toast({ title: "Saldo insuficiente", variant: "destructive" }); return; }
     if (!pixKey.trim()) { toast({ title: "Informe sua chave PIX", variant: "destructive" }); return; }
 
-    subtractBalance(Number(amount));
-    addTransaction({ type: "withdraw", amount: Number(amount), status: "pending", description: `Saque PIX para ${pixKey}` });
-    setStep("processing");
-    setTimeout(() => setStep("done"), 3000);
+    try {
+      await wallet.withdraw({ amount: Number(amount), pix_key_type: pixType, pix_key: pixKey.trim() });
+      addTransaction({ type: "withdraw", amount: Number(amount), status: "pending", description: `Saque PIX para ${pixKey}` });
+      setStep("processing");
+      setTimeout(() => { setStep("done"); refreshUser(); }, 2000);
+    } catch {
+      toast({ title: "Erro ao solicitar saque", variant: "destructive" });
+    }
   };
 
   return (
@@ -125,4 +130,3 @@ export default function WithdrawPage() {
     </div>
   );
 }
-

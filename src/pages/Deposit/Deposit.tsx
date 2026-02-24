@@ -10,39 +10,57 @@ import AuthModal from "@/components/auth/AuthModal";
 import { useBalance } from "@/context/BalanceContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { wallet } from "@/lib/api";
 import type { DepositStep } from "./types";
-import { QUICK_VALUES, FAKE_PIX_CODE, MIN_DEPOSIT_AMOUNT } from "./constants";
+import { QUICK_VALUES, MIN_DEPOSIT_AMOUNT } from "./constants";
 
 export default function DepositPage() {
   const [amount, setAmount] = useState<number | "">("");
   const [step, setStep] = useState<DepositStep>("select");
   const [copied, setCopied] = useState(false);
+  const [pixData, setPixData] = useState<{ id: string; pixCode: string; qrCodeBase64: string } | null>(null);
 
   const { balance, addBalance, addTransaction } = useBalance();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, openAuth, refreshUser } = useAuth();
   const { toast } = useToast();
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!isLoggedIn) { openAuth("login"); return; }
     if (!amount || Number(amount) < MIN_DEPOSIT_AMOUNT) { toast({ title: `Mínimo R$${MIN_DEPOSIT_AMOUNT}`, variant: "destructive" }); return; }
-    setStep("pix");
+    try {
+      const res = await wallet.deposit(Number(amount));
+      setPixData({ id: res.id, pixCode: res.pixCode, qrCodeBase64: res.qrCodeBase64 });
+      setStep("pix");
+    } catch {
+      toast({ title: "Erro ao gerar PIX", variant: "destructive" });
+    }
   };
 
-  const simulatePayment = () => {
+  const simulatePayment = async () => {
+    if (!pixData) return;
     setStep("confirming");
-    setTimeout(() => {
-      addBalance(Number(amount));
-      addTransaction({ type: "deposit", amount: Number(amount), status: "approved", description: "Depósito PIX" });
-      setStep("done");
-      toast({ title: "Depósito confirmado!", description: `R$ ${Number(amount).toFixed(2)} adicionado ao seu saldo` });
-    }, 3000);
+    const poll = async () => {
+      const res = await wallet.depositStatus(pixData.id);
+      if (res.status === "approved") {
+        addBalance(Number(amount));
+        addTransaction({ type: "deposit", amount: Number(amount), status: "approved", description: "Depósito PIX" });
+        setStep("done");
+        toast({ title: "Depósito confirmado!", description: `R$ ${Number(amount).toFixed(2)} adicionado ao seu saldo` });
+        refreshUser();
+        return;
+      }
+      setTimeout(poll, 2000);
+    };
+    setTimeout(poll, 2000);
   };
 
   const copyPix = () => {
-    navigator.clipboard.writeText(FAKE_PIX_CODE);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Código copiado!" });
+    if (pixData) {
+      navigator.clipboard.writeText(pixData.pixCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: "Código copiado!" });
+    }
   };
 
   return (
@@ -92,17 +110,17 @@ export default function DepositPage() {
               </div>
             )}
 
-            {step === "pix" && (
+            {step === "pix" && pixData && (
               <div className="p-6 text-center space-y-4">
                 <p className="font-bold">Escaneie o QR Code</p>
                 <div className="inline-block p-4 bg-white rounded-xl">
-                  <div className="w-48 h-48 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0id2hpdGUiLz48cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0id2hpdGUiLz48cmVjdCB4PSIyMCIgeT0iMjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSI2MCIgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSI2NSIgeT0iMTUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0id2hpdGUiLz48cmVjdCB4PSI3MCIgeT0iMjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSIxMCIgeT0iNjAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSIxNSIgeT0iNjUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0id2hpdGUiLz48cmVjdCB4PSIyMCIgeT0iNzAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSI0NSIgeT0iMTAiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9ImJsYWNrIi8+PHJlY3QgeD0iNDUiIHk9IjIwIiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJibGFjayIvPjxyZWN0IHg9IjQ1IiB5PSIzNSIgd2lkdGg9IjUiIGhlaWdodD0iMTUiIGZpbGw9ImJsYWNrIi8+PHJlY3QgeD0iNjAiIHk9IjUwIiB3aWR0aD0iMTUiIGhlaWdodD0iNSIgZmlsbD0iYmxhY2siLz48cmVjdCB4PSI4MCIgeT0iNTAiIHdpZHRoPSIxMCIgaGVpZ2h0PSI1IiBmaWxsPSJibGFjayIvPjxyZWN0IHg9IjUwIiB5PSI2MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjMwIiBmaWxsPSJibGFjayIvPjxyZWN0IHg9IjY1IiB5PSI2NSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJibGFjayIvPjxyZWN0IHg9IjgwIiB5PSI2MCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjE1IiBmaWxsPSJibGFjayIvPjxyZWN0IHg9IjY1IiB5PSI4MCIgd2lkdGg9IjI1IiBoZWlnaHQ9IjEwIiBmaWxsPSJibGFjayIvPjwvc3ZnPg==')] bg-cover" />
+                  <img src={pixData.qrCodeBase64} alt="QR PIX" className="w-48 h-48" />
                 </div>
                 <p className="text-sm text-muted-foreground">Valor: <span className="text-neon-gold font-black">R$ {Number(amount).toFixed(2)}</span></p>
 
                 <div className="relative">
                   <div className="p-3 bg-secondary rounded-xl border border-border text-xs font-mono text-muted-foreground break-all">
-                    {FAKE_PIX_CODE.substring(0, 60)}...
+                    {pixData.pixCode}
                   </div>
                   <button onClick={copyPix} className="absolute right-2 top-2 p-1.5 hover:bg-primary/20 rounded transition-colors">
                     {copied ? <CheckCircle2 className="w-4 h-4 text-neon-green" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
@@ -145,4 +163,3 @@ export default function DepositPage() {
     </div>
   );
 }
-
