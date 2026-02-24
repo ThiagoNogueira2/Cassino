@@ -98,10 +98,15 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::create(array_merge($userData, [
+            $user = User::create(array_merge($userData, [
                 'avatar' => null,
                 'role' => 'user',
             ]));
+            
+            // Sync wallet balance with user balance
+            if ($user->wallet) {
+                $user->wallet->update(['balance' => $user->balance]);
+            }
         }
 
         echo "\n✅ 10 usuários criados com sucesso!\n\n";

@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('withdrawals', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->decimal('amount', 15, 2);
+            $table->enum('pix_key_type', ['cpf', 'email', 'phone', 'random']);
+            $table->string('pix_key');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('approved');
             $table->timestamps();
+            $table->index('user_id');
+            $table->index('status');
         });
     }
 
