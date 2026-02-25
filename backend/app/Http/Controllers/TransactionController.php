@@ -65,6 +65,93 @@ class TransactionController extends Controller
     }
 
     /**
+     * Get all transactions for admin (all users).
+     * 
+     * Query parameters:
+     * - user_id: filter by user ID
+     * - type: deposit|withdraw|win|loss|bonus
+     * - status: pending|approved|rejected
+     * - page: page number (default: 1)
+     * - limit: items per page (default: 20)
+     */
+    public function adminIndex(Request $request): JsonResponse
+    {
+        $query = Transaction::with('user');
+
+        // Filter by user_id if provided
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->query('user_id'));
+        }
+
+        // Filter by type if provided
+        if ($request->has('type')) {
+            $type = $request->query('type');
+            if (in_array($type, ['deposit', 'withdraw', 'win', 'loss', 'bonus'])) {
+                $query->where('type', $type);
+            }
+        }
+
+        // Filter by status if provided
+        if ($request->has('status')) {
+            $status = $request->query('status');
+            if (in_array($status, ['pending', 'approved', 'rejected'])) {
+                $query->where('status', $status);
+            }
+        }
+
+        // Get pagination parameters
+        $page = $request->query('page', 1);
+        $limit = $request->query('limit', 20);
+        $limit = min($limit, 100);
+
+        // Order by most recent first
+        $query->orderBy('created_at', 'desc');
+
+        // Get paginated results
+        $transactions = $query->paginate($limit, ['*'], 'page', $page);
+
+        return response()->json([
+            'data' => $transactions->map(function ($transaction) {
+                $data = $transaction->toApiArray();
+                if ($transaction->user) {
+                    $data['user'] = [
+                        'id' => $transaction->user->id,
+                        'name' => $transaction->user->name,
+                        'email' => $transaction->user->email,
+                    ];
+                }
+                return $data;
+            }),
+            'pagination' => [
+                'total' => $transactions->total(),
+                'count' => $transactions->count(),
+                'perPage' => $transactions->perPage(),
+                'currentPage' => $transactions->currentPage(),
+                'lastPage' => $transactions->lastPage(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get a specific transaction by ID for admin.
+     */
+    public function adminShow($id): JsonResponse
+    {
+        $transaction = Transaction::with('user')->findOrFail($id);
+
+        $data = $transaction->toApiArray();
+        if ($transaction->user) {
+            $data['user'] = [
+                'id' => $transaction->user->id,
+                'name' => $transaction->user->name,
+                'email' => $transaction->user->email,
+            ];
+        }
+
+        return response()->json($data);
+    }
+
+    /**
      * Get a specific transaction by ID.
      */
     public function show(Request $request, $id): JsonResponse

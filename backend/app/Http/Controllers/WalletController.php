@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class WalletController extends Controller
 {
@@ -59,34 +60,36 @@ class WalletController extends Controller
         // Generate fictional QR code (just a placeholder)
         $qrCodeBase64 = $this->generateQrCode($pixCode);
 
-        // Create deposit record with approved status (fictional)
-        $deposit = Deposit::create([
-            'user_id' => $user->id,
-            'amount' => $validated['amount'],
-            'pix_code' => $pixCode,
-            'qr_code_base64' => $qrCodeBase64,
-            'status' => 'approved',
-            'expires_at' => now()->addMinutes(30),
-        ]);
+        return DB::transaction(function () use ($user, $wallet, $validated, $pixCode, $qrCodeBase64) {
+            // Create deposit record with approved status (fictional)
+            $deposit = Deposit::create([
+                'user_id' => $user->id,
+                'amount' => $validated['amount'],
+                'pix_code' => $pixCode,
+                'qr_code_base64' => $qrCodeBase64,
+                'status' => 'approved',
+                'expires_at' => now()->addMinutes(30),
+            ]);
 
-        // Create transaction record
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'deposit',
-            'amount' => $validated['amount'],
-            'status' => 'approved',
-            'description' => "Depósito PIX - {$pixCode}",
-        ]);
+            // Create transaction record
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'deposit',
+                'amount' => $validated['amount'],
+                'status' => 'approved',
+                'description' => "Depósito PIX - {$pixCode}",
+            ]);
 
-        // Update wallet balance
-        $wallet->balance += $validated['amount'];
-        $wallet->save();
+            // Update wallet balance
+            $wallet->balance += $validated['amount'];
+            $wallet->save();
 
-        // Update user balance
-        $user->balance += $validated['amount'];
-        $user->save();
+            // Update user balance
+            $user->balance += $validated['amount'];
+            $user->save();
 
-        return response()->json($deposit->toApiArray(), 201);
+            return response()->json($deposit->toApiArray(), 201);
+        });
     }
 
     /**
@@ -108,7 +111,7 @@ class WalletController extends Controller
     public function withdraw(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:20',
+            'amount' => 'required|numeric|min:1',
             'pix_key_type' => 'required|in:cpf,email,phone,random',
             'pix_key' => 'required|string',
         ]);
@@ -129,33 +132,35 @@ class WalletController extends Controller
             ], 422);
         }
 
-        // Create withdrawal record with approved status (fictional)
-        $withdrawal = Withdrawal::create([
-            'user_id' => $user->id,
-            'amount' => $validated['amount'],
-            'pix_key_type' => $validated['pix_key_type'],
-            'pix_key' => $validated['pix_key'],
-            'status' => 'approved',
-        ]);
+        return DB::transaction(function () use ($user, $wallet, $validated) {
+            // Create withdrawal record with approved status (fictional)
+            $withdrawal = Withdrawal::create([
+                'user_id' => $user->id,
+                'amount' => $validated['amount'],
+                'pix_key_type' => $validated['pix_key_type'],
+                'pix_key' => $validated['pix_key'],
+                'status' => 'approved',
+            ]);
 
-        // Create transaction record
-        Transaction::create([
-            'user_id' => $user->id,
-            'type' => 'withdraw',
-            'amount' => $validated['amount'],
-            'status' => 'approved',
-            'description' => "Saque PIX - {$validated['pix_key_type']}: {$validated['pix_key']}",
-        ]);
+            // Create transaction record
+            Transaction::create([
+                'user_id' => $user->id,
+                'type' => 'withdraw',
+                'amount' => $validated['amount'],
+                'status' => 'approved',
+                'description' => "Saque PIX - {$validated['pix_key_type']}: {$validated['pix_key']}",
+            ]);
 
-        // Update wallet balance
-        $wallet->balance -= $validated['amount'];
-        $wallet->save();
+            // Update wallet balance
+            $wallet->balance -= $validated['amount'];
+            $wallet->save();
 
-        // Update user balance
-        $user->balance -= $validated['amount'];
-        $user->save();
+            // Update user balance
+            $user->balance -= $validated['amount'];
+            $user->save();
 
-        return response()->json($withdrawal->toApiArray(), 201);
+            return response()->json($withdrawal->toApiArray(), 201);
+        });
     }
 
     /**

@@ -50,11 +50,18 @@ Route::middleware('auth:sanctum')->prefix('users')->group(function () {
 });
 
 // Admin routes
-Route::middleware('auth:sanctum', 'admin')->prefix('admin/users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
+Route::middleware('auth:sanctum', 'admin')->prefix('admin')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+
+    Route::prefix('transactions')->group(function () {
+        Route::get('/', [TransactionController::class, 'adminIndex']);
+        Route::get('/{id}', [TransactionController::class, 'adminShow']);
+    });
 });
 
 // Wallet routes
@@ -79,4 +86,3 @@ Route::middleware('auth:sanctum')->prefix('transactions')->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json($request->user()->toApiArray());
 });
-

@@ -439,6 +439,52 @@ Authorization: Bearer {admin_token}
 }
 ```
 
+### Transações
+#### GET `/api/admin/transactions`
+Lista todas as transações.
+
+**Resposta (200):**
+```json
+{
+  "data": [
+        {
+            "id": "10",
+            "type": "withdraw",
+            "amount": 1.11,
+            "date": "2026-02-25T13:52:57+00:00",
+            "status": "approved",
+            "description": "Saque PIX - cpf: 123.456.789-00",
+            "user": {
+                "id": 12,
+                "name": "João teste",
+                "email": "joao1@example.com"
+            }
+        },
+        //...
+  ]
+}
+```
+
+#### GET `/api/admin/transactions/{id}`
+Lista uma transação específica.
+
+**Resposta (200):**
+```json
+{
+    "id": "9",
+    "type": "withdraw",
+    "amount": 20.01,
+    "date": "2026-02-25T13:36:59+00:00",
+    "status": "approved",
+    "description": "Saque PIX - cpf: 123.456.789-00",
+    "user": {
+        "id": 12,
+        "name": "João teste",
+        "email": "joao1@example.com"
+    }
+}
+```
+
 ---
 
 ## Dados de Teste
@@ -497,7 +543,6 @@ Onde `{token}` é o valor retornado ao fazer login.
 
 ---
 
-
 ## Carteira
 
 ### GET `/api/wallet/balance`
@@ -533,7 +578,6 @@ Cria depósito PIX (gera QR code / copia-cola)	{ amount }
     "expiresAt": "2026-02-23T14:46:16+00:00"
 }
 ```
-
 
 #### GET	/api/wallet/deposit/:id/status
 Verifica status do depósito(depositId)
@@ -592,4 +636,24 @@ Verifica status do saque (withdrawId)
 
 ---
 
-Atualizado em: **23 de Fevereiro de 2026**
+## Transações
+Lista todas as transações de usuários
+
+- **Endpoints**:
+  ```
+  GET    /api/transactions              - Listar transações do usuário
+  GET    /api/transactions/{id}         - Detalhes de uma transação
+  POST   /api/transactions              - Criar transação (interno)
+  PUT    /api/transactions/{id}         - Atualizar transação
+  DELETE /api/transactions/{id}         - Deletar transação
+  ```
+
+```bash
+GET /api/transactions
+GET /api/transactions?type=deposit
+GET /api/transactions?type=withdraw
+GET /api/transactions?status=approved
+GET /api/transactions?type=deposit&status=approved&page=1&limit=20
+```
+
+Atualizado em: **25 de Fevereiro de 2026**
