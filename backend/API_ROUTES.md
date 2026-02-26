@@ -439,6 +439,116 @@ Authorization: Bearer {admin_token}
 }
 ```
 
+### Transações
+#### GET `/api/admin/transactions`
+Lista todas as transações.
+
+**Resposta (200):**
+```json
+{
+  "data": [
+        {
+            "id": "10",
+            "type": "withdraw",
+            "amount": 1.11,
+            "date": "2026-02-25T13:52:57+00:00",
+            "status": "approved",
+            "description": "Saque PIX - cpf: 123.456.789-00",
+            "user": {
+                "id": 12,
+                "name": "João teste",
+                "email": "joao1@example.com"
+            }
+        },
+        //...
+  ]
+}
+```
+
+#### GET `/api/admin/transactions/{id}`
+Lista uma transação específica.
+
+**Resposta (200):**
+```json
+{
+    "id": "9",
+    "type": "withdraw",
+    "amount": 20.01,
+    "date": "2026-02-25T13:36:59+00:00",
+    "status": "approved",
+    "description": "Saque PIX - cpf: 123.456.789-00",
+    "user": {
+        "id": 12,
+        "name": "João teste",
+        "email": "joao1@example.com"
+    }
+}
+```
+
+#### PUT `/api/admin/transactions/{id}/approve`
+Aprova uma transação de saque pendente.
+
+**Headers:**
+```
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+```
+
+**Parâmetro URL:**
+- `id`: ID da transação
+
+**Resposta (200):**
+```json
+{
+  "message": "Transaction approved successfully",
+  "transaction": {
+    "id": "9",
+    "type": "withdraw",
+    "amount": 20.01,
+    "status": "approved",
+    "approvedAt": "2026-02-26T10:00:00+00:00",
+    "approvedBy": "admin@cassino.com"
+  }
+}
+```
+
+---
+
+#### PUT `/api/admin/transactions/{id}/reject`
+Rejeita uma transação de saque pendente.
+
+**Headers:**
+```
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+```
+
+**Parâmetro URL:**
+- `id`: ID da transação
+
+**Body (opcional):**
+```json
+{
+  "rejectionReason": "Saldo insuficiente"
+}
+```
+
+**Resposta (200):**
+```json
+{
+  "message": "Transaction rejected successfully",
+  "transaction": {
+    "id": "9",
+    "type": "withdraw",
+    "amount": 20.01,
+    "status": "rejected",
+    "rejectedAt": "2026-02-26T10:00:00+00:00",
+    "rejectedBy": "admin@cassino.com",
+    "rejectionReason": "Saldo insuficiente"
+  }
+}
+```
+
 ---
 
 ## Dados de Teste
@@ -476,27 +586,11 @@ Onde `{token}` é o valor retornado ao fazer login.
 | **Admin - Ver** | ![Completa](https://img.shields.io/badge/✅_Completa-brightgreen) | Ver detalhes de um usuário |
 | **Admin - Atualizar** | ![Completa](https://img.shields.io/badge/✅_Completa-brightgreen) | Atualizar qualquer usuário |
 | **Admin - Deletar** | ![Completa](https://img.shields.io/badge/✅_Completa-brightgreen) | Soft Delete de usuário |
-| **Forgot Password** | ![Em Dev](https://img.shields.io/badge/🔧_Em_Dev-orange) | Envio de email para reset |
-| **Reset Password** | ![Em Dev](https://img.shields.io/badge/🔧_Em_Dev-orange) | Reset de senha via token |
+| **Forgot Password** | ![Completa](https://img.shields.io/badge/✅_Completa-brightgreen) | Envia token para resetar senha |
+| **Reset Password** | ![Completa](https://img.shields.io/badge/✅_Completa-brightgreen) | Reset de senha via token |
 | **Refresh Token** | ![Em Dev](https://img.shields.io/badge/🔧_Em_Dev-orange) | Atualizar token de acesso |
 
 ---
-
-## Notas Importantes
-
-1. **Soft Delete:** Quando um usuário é deletado via `/api/admin/users/{id}` (DELETE), ele não é realmente removido do banco. Apenas a coluna `deleted_at` é preenchida.
-
-2. **Permissões:** As rotas de admin (`/api/admin/*`) requerem `role = 'admin'`. Usuários normais recebem erro 403.
-
-3. **Validações:** 
-   - Email é único
-   - CPF é validado no formato `000.000.000-00`
-   - Senhas mínimo 6 caracteres
-
-4. **Response:** Todos as respostas são em JSON com HTTP status codes apropriados.
-
----
-
 
 ## Carteira
 
@@ -533,7 +627,6 @@ Cria depósito PIX (gera QR code / copia-cola)	{ amount }
     "expiresAt": "2026-02-23T14:46:16+00:00"
 }
 ```
-
 
 #### GET	/api/wallet/deposit/:id/status
 Verifica status do depósito(depositId)
@@ -592,4 +685,147 @@ Verifica status do saque (withdrawId)
 
 ---
 
-Atualizado em: **23 de Fevereiro de 2026**
+## Transações
+Lista todas as transações de usuários
+
+- **Endpoints**:
+  ```
+  GET    /api/transactions              - Listar transações do usuário
+  GET    /api/transactions/{id}         - Detalhes de uma transação
+  POST   /api/transactions              - Criar transação (interno)
+  PUT    /api/transactions/{id}         - Atualizar transação
+  DELETE /api/transactions/{id}         - Deletar transação
+  ```
+
+```bash
+GET /api/transactions
+GET /api/transactions?type=deposit
+GET /api/transactions?type=withdraw
+GET /api/transactions?status=approved
+GET /api/transactions?type=deposit&status=approved&page=1&limit=20
+```
+
+---
+
+## Jogo — Crash
+Por ora é necessário rodar o comando "./docker-artisan.sh game:crash-loop" para iniciar o loop do jogo.
+
+### GET `/api/games/crash/current`
+Retorna o estado da rodada atual do Crash.
+
+**Resposta (200):**
+```json
+{
+  "status": "flying",
+  "multiplier": 2.45,
+  "countdown": null,
+  "roundId": "round_abc123"
+}
+```
+
+**Status possíveis:** `waiting`, `flying`, `crashed`
+
+---
+
+### GET `/api/games/crash/history`
+Retorna o histórico das últimas rodadas.
+
+**Query Params:**
+- `limit`: Limite de resultados (default: 15)
+
+**Resposta (200):**
+```json
+{
+  "data": [
+    {
+      "id": "round_abc123",
+      "multiplier": 2.45,
+      "timestamp": "2026-02-25T14:30:00+00:00",
+      "hash": "a1b2c3d4e5f6..."
+    },
+    {
+      "id": "round_abc122",
+      "multiplier": 1.15,
+      "timestamp": "2026-02-25T14:28:00+00:00",
+      "hash": "f6e5d4c3b2a1..."
+    }
+  ]
+}
+```
+
+---
+
+### POST `/api/games/crash/bet`
+Registra aposta na próxima rodada do Crash.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "amount": 50.00
+}
+```
+
+**Resposta (201):**
+```json
+{
+  "message": "Bet placed successfully",
+  "bet": {
+    "id": "bet_123",
+    "amount": 50.00,
+    "roundId": "round_abc123",
+    "status": "pending"
+  }
+}
+```
+
+---
+
+### POST `/api/games/crash/cashout`
+Faz cashout durante o voo do Crash.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "betId": "bet_123"
+}
+```
+
+**Resposta (200):**
+```json
+{
+  "message": "Cashout successful",
+  "multiplier": 2.45,
+  "payout": 122.50,
+  "newBalance": 1122.50
+}
+```
+
+---
+
+### ⚡ WebSocket: `ws://host/ws/crash`
+
+**Eventos emitidos pelo servidor:**
+
+| Evento | Descrição |
+| :--- | :--- |
+| `round_start` | Nova rodada iniciada, contagem regressiva |
+| `multiplier_update` | Multiplicador em tempo real |
+| `round_crash` | Rodada crashou + multiplicador final |
+| `player_cashout` | Jogador fez cashout (público) |
+| `countdown` | Contagem regressiva para próxima rodada |
+
+---
+
+Atualizado em: **26 de Fevereiro de 2026**

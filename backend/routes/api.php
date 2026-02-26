@@ -4,8 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CrashGameController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,8 +33,8 @@ Route::get('/health', function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail']);
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
     
     // Protected auth routes
@@ -50,11 +52,18 @@ Route::middleware('auth:sanctum')->prefix('users')->group(function () {
 });
 
 // Admin routes
-Route::middleware('auth:sanctum', 'admin')->prefix('admin/users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
+Route::middleware('auth:sanctum', 'admin')->prefix('admin')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+
+    Route::prefix('transactions')->group(function () {
+        Route::get('/', [TransactionController::class, 'adminIndex']);
+        Route::get('/{id}', [TransactionController::class, 'adminShow']);
+    });
 });
 
 // Wallet routes
@@ -75,8 +84,14 @@ Route::middleware('auth:sanctum')->prefix('transactions')->group(function () {
     Route::delete('/{id}', [TransactionController::class, 'destroy']);
 });
 
+// Crash Game routes
+Route::middleware('auth:sanctum')->prefix('games/crash')->group(function () {
+    Route::get('/current', [CrashGameController::class, 'current']);
+    Route::post('/bet', [CrashGameController::class, 'bet']);
+    Route::post('/cashout', [CrashGameController::class, 'cashout']);
+});
+
 // Fallback for backward compatibility
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json($request->user()->toApiArray());
 });
-
