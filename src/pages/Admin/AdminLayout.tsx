@@ -35,7 +35,6 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#050d18] text-white flex">
- 
       <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-white/10 bg-[#071423]/95 backdrop-blur-xl">
         <div className="flex h-full flex-col">
           <Link
@@ -59,7 +58,9 @@ export default function AdminLayout({
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
               const Icon = item.icon;
-              const disabled = item.href === "/admin/reports" || item.href === "/admin/settings";
+              const disabled =
+                item.href === "/admin/reports" ||
+                item.href === "/admin/settings";
               return (
                 <Link
                   key={item.href}
@@ -69,12 +70,14 @@ export default function AdminLayout({
                     disabled && "pointer-events-none opacity-50",
                     isActive
                       ? "bg-[#f02254]/20 text-white shadow-inner"
-                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white",
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
                   {item.label}
-                  {isActive && <ChevronRight className="ml-auto h-4 w-4 text-[#f02254]" />}
+                  {isActive && (
+                    <ChevronRight className="ml-auto h-4 w-4 text-[#f02254]" />
+                  )}
                 </Link>
               );
             })}
@@ -86,7 +89,9 @@ export default function AdminLayout({
                 <Shield className="h-4 w-4 text-amber-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
+                <p className="truncate text-sm font-semibold text-white">
+                  {user?.name}
+                </p>
                 <p className="truncate text-xs text-slate-400">{user?.email}</p>
               </div>
             </div>
@@ -102,7 +107,6 @@ export default function AdminLayout({
         </div>
       </aside>
 
-     
       <div className="flex-1 pl-64">
         {(title || subtitle) && (
           <div className="border-b border-white/10 bg-[#071423]/50 px-8 py-6">

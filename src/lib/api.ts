@@ -126,3 +126,37 @@ export const wallet = {
   withdrawStatus: (id: string) =>
     api.get(`/wallet/withdraw/${id}/status`, true),
 };
+
+export const transactions = {
+  list: (params?: {
+    type?: "deposit" | "withdraw" | "win";
+    status?: "approved" | "pending" | "rejected";
+    page?: number;
+    limit?: number;
+  }) => {
+    const search = new URLSearchParams();
+
+    if (params?.type) search.set("type", params.type);
+    if (params?.status) search.set("status", params.status);
+    if (params?.page) search.set("page", String(params.page));
+    if (params?.limit) search.set("limit", String(params.limit));
+
+    const qs = search.toString();
+    const url = qs ? `/transactions?${qs}` : "/transactions";
+
+    return api.get(url, true);
+  },
+
+  getById: (id: string) => api.get(`/transactions/${id}`, true),
+
+  create: (body: {
+    type: "deposit" | "withdraw" | "win";
+    amount: number;
+    description?: string;
+  }) => api.post("/transactions", body, true),
+
+  update: (id: string, body: Partial<{ status: string; description: string }>) =>
+    api.put(`/transactions/${id}`, body, true),
+
+  remove: (id: string) => api.delete(`/transactions/${id}`, true),
+};

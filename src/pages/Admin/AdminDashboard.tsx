@@ -98,7 +98,6 @@ export default function AdminDashboard() {
   const recentUsers = [...users].slice(0, 8);
   const adminCount = users.filter((u) => u.role === "admin").length;
 
-
   const now = new Date();
   const chartData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now);

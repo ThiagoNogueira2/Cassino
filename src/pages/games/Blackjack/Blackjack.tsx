@@ -21,13 +21,20 @@ export default function BlackjackGame() {
   const [currentBet, setCurrentBet] = useState(0);
   const [resultMsg, setResultMsg] = useState("");
 
-  const { balance, addBalance, subtractBalance, addBet, addTransaction } = useBalance();
+  const { balance, addBalance, subtractBalance, addBet, addTransaction } =
+    useBalance();
   const { isLoggedIn, openAuth } = useAuth();
   const { toast } = useToast();
 
   const startGame = () => {
-    if (!isLoggedIn) { openAuth("login"); return; }
-    if (betAmount > balance) { toast({ title: "Saldo insuficiente", variant: "destructive" }); return; }
+    if (!isLoggedIn) {
+      openAuth("login");
+      return;
+    }
+    if (betAmount > balance) {
+      toast({ title: "Saldo insuficiente", variant: "destructive" });
+      return;
+    }
     subtractBalance(betAmount);
     setCurrentBet(betAmount);
     setResultMsg("");
@@ -57,7 +64,9 @@ export default function BlackjackGame() {
   const stand = async () => {
     setGameState("dealerTurn");
 
-    let dCards = dealerCards.map((c, i) => i === 1 ? { ...c, hidden: false } : c);
+    let dCards = dealerCards.map((c, i) =>
+      i === 1 ? { ...c, hidden: false } : c,
+    );
     setDealerCards(dCards);
 
     // Dealer draws until >= 17
@@ -72,7 +81,10 @@ export default function BlackjackGame() {
   };
 
   const double = () => {
-    if (currentBet > balance) { toast({ title: "Saldo insuficiente", variant: "destructive" }); return; }
+    if (currentBet > balance) {
+      toast({ title: "Saldo insuficiente", variant: "destructive" });
+      return;
+    }
     subtractBalance(currentBet);
     const doubled = currentBet * 2;
     setCurrentBet(doubled);
@@ -86,7 +98,13 @@ export default function BlackjackGame() {
     }
   };
 
-  const endGame = (pCards: Card[], dCards: Card[], bet: number, isBlackjack = false, reason?: string) => {
+  const endGame = (
+    pCards: Card[],
+    dCards: Card[],
+    bet: number,
+    isBlackjack = false,
+    reason?: string,
+  ) => {
     const pVal = getHandValue(pCards);
     const dCards2 = dCards.map((c) => ({ ...c, hidden: false }));
     const dVal = getHandValue(dCards2);
@@ -96,7 +114,7 @@ export default function BlackjackGame() {
     let win = false;
     let prize = 0;
 
-    if (reason === "bust" || (pVal > 21)) {
+    if (reason === "bust" || pVal > 21) {
       msg = `💥 Estourou! Você perdeu R$ ${bet.toFixed(2)}`;
     } else if (isBlackjack && pVal === 21) {
       prize = bet * 2.5;
@@ -116,10 +134,27 @@ export default function BlackjackGame() {
 
     if (win && prize > 0) {
       addBalance(prize);
-      addTransaction({ type: "win", amount: prize, status: "approved", description: "Ganho no Blackjack" });
-      addBet({ game: "Blackjack", betAmount: bet, result: prize / bet, profit: prize - bet, outcome: "win" });
+      addTransaction({
+        type: "win",
+        amount: prize,
+        status: "approved",
+        description: "Ganho no Blackjack",
+      });
+      addBet({
+        game: "Blackjack",
+        betAmount: bet,
+        result: prize / bet,
+        profit: prize - bet,
+        outcome: "win",
+      });
     } else if (!win) {
-      addBet({ game: "Blackjack", betAmount: bet, result: 0, profit: -bet, outcome: "loss" });
+      addBet({
+        game: "Blackjack",
+        betAmount: bet,
+        result: 0,
+        profit: -bet,
+        outcome: "loss",
+      });
     }
 
     setResultMsg(msg);
@@ -136,7 +171,10 @@ export default function BlackjackGame() {
 
       <div className="pt-16 pb-20 md:pb-4">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
 
@@ -146,16 +184,25 @@ export default function BlackjackGame() {
               <h1 className="text-xl font-black">🎴 Blackjack</h1>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Saldo</p>
-                <p className="text-primary font-black">R$ {balance.toFixed(2)}</p>
+                <p className="text-primary font-black">
+                  R$ {balance.toFixed(2)}
+                </p>
               </div>
             </div>
 
-            {/* Table */}
-            <div className="p-6 min-h-[400px] flex flex-col gap-8" style={{ background: "radial-gradient(ellipse at center, hsl(158 64% 8%), hsl(158 64% 4%))" }}>
-              {/* Dealer */}
+            <div
+              className="p-6 min-h-[400px] flex flex-col gap-8"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, hsl(158 64% 8%), hsl(158 64% 4%))",
+              }}
+            >
               <div className="text-center">
                 <p className="text-xs text-muted-foreground uppercase mb-3">
-                  Dealer {gameState !== "idle" && gameState !== "playing" ? `— ${dScore} pts` : ""}
+                  Dealer{" "}
+                  {gameState !== "idle" && gameState !== "playing"
+                    ? `— ${dScore} pts`
+                    : ""}
                 </p>
                 <div className="flex justify-center gap-2 flex-wrap">
                   {dealerCards.map((card, i) => (
@@ -169,7 +216,6 @@ export default function BlackjackGame() {
                 </div>
               </div>
 
-              {/* Result */}
               <AnimatePresence>
                 {resultMsg && (
                   <motion.div
@@ -183,7 +229,6 @@ export default function BlackjackGame() {
                 )}
               </AnimatePresence>
 
-              {/* Player */}
               <div className="text-center">
                 <div className="flex justify-center gap-2 flex-wrap mb-3">
                   {playerCards.map((card, i) => (
@@ -197,40 +242,67 @@ export default function BlackjackGame() {
                 </div>
                 <p className="text-xs text-muted-foreground uppercase">
                   Você {gameState !== "idle" ? `— ${pScore} pts` : ""}
-                  {pScore > 21 && <span className="text-destructive ml-2 font-bold">BUST!</span>}
-                  {pScore === 21 && playerCards.length === 2 && <span className="text-primary ml-2 font-bold">BLACKJACK!</span>}
+                  {pScore > 21 && (
+                    <span className="text-destructive ml-2 font-bold">
+                      BUST!
+                    </span>
+                  )}
+                  {pScore === 21 && playerCards.length === 2 && (
+                    <span className="text-primary ml-2 font-bold">
+                      BLACKJACK!
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
 
-            {/* Controls */}
             <div className="p-4 border-t border-border">
               {gameState === "idle" || gameState === "finished" ? (
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
-                    <label className="text-xs text-muted-foreground mb-1 block">Aposta (R$)</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Aposta (R$)
+                    </label>
                     <div className="flex gap-1">
                       {[5, 10, 25, 50, 100, 200].map((v) => (
-                        <button key={v} onClick={() => setBetAmount(v)} className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors ${betAmount === v ? "bg-primary border-primary text-white" : "bg-secondary border-border"}`}>
+                        <button
+                          key={v}
+                          onClick={() => setBetAmount(v)}
+                          className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors ${betAmount === v ? "bg-primary border-primary text-white" : "bg-secondary border-border"}`}
+                        >
                           {v}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <Button className="gradient-primary border-0 text-white font-black h-10 px-6" onClick={startGame}>
+                  <Button
+                    className="gradient-primary border-0 text-white font-black h-10 px-6"
+                    onClick={startGame}
+                  >
                     {gameState === "finished" ? "Nova Rodada" : "Iniciar Jogo"}
                   </Button>
                 </div>
               ) : gameState === "playing" ? (
                 <div className="flex gap-3">
-                  <Button className="flex-1 gradient-primary border-0 text-white font-bold" onClick={hit}>
+                  <Button
+                    className="flex-1 gradient-primary border-0 text-white font-bold"
+                    onClick={hit}
+                  >
                     Pedir Carta
                   </Button>
-                  <Button variant="outline" className="flex-1 border-primary/50 text-primary hover:bg-primary/10 font-bold" onClick={stand}>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-primary/50 text-primary hover:bg-primary/10 font-bold"
+                    onClick={stand}
+                  >
                     Parar
                   </Button>
                   {playerCards.length === 2 && (
-                    <Button variant="outline" className="flex-1 border-primary/40 text-primary hover:bg-primary/10 font-bold" onClick={double}>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-primary/40 text-primary hover:bg-primary/10 font-bold"
+                      onClick={double}
+                    >
                       Dobrar
                     </Button>
                   )}
@@ -242,18 +314,18 @@ export default function BlackjackGame() {
               )}
             </div>
 
-            {/* Bet info */}
             {currentBet > 0 && (
               <div className="px-4 pb-4 text-center text-xs text-muted-foreground">
-                Aposta atual: <span className="text-primary font-bold">R$ {currentBet.toFixed(2)}</span>
+                Aposta atual:{" "}
+                <span className="text-primary font-bold">
+                  R$ {currentBet.toFixed(2)}
+                </span>
               </div>
             )}
           </div>
         </div>
       </div>
-
       <BottomNav />
     </div>
   );
 }
-
