@@ -156,8 +156,9 @@ Reseta a senha (em desenvolvimento).
 ```json
 {
   "token": "reset_token_here",
-  "newPassword": "NovaSenha123!",
-  "newPassword_confirmation": "NovaSenha123!"
+  "email": "joao@example.com",
+  "password": "NovaSenha123!",
+  "password_confirmation": "NovaSenha123!"
 }
 ```
 
@@ -828,4 +829,40 @@ Content-Type: application/json
 
 ---
 
-Atualizado em: **26 de Fevereiro de 2026**
+## Jogo - Slots
+
+### POST `/api/games/slots/spin`
+Aposta no jogo Slots.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "amount": 10.00
+}
+```
+
+**Resposta (200):**
+```json
+{
+  "reels": [
+    ["7️⃣", "⭐", "🍋", "💎", "🍋"],
+    ["🍊", "🍊", "🍊", "🍊", "🍊"],
+    ["7️⃣", "🍋", "💎", "🍊", "🔔"]
+  ],
+  "win": true,
+  "multiplier": 10,
+  "prize": 100,
+  "newBalance": 26180.5,
+  "betId": 184
+}
+```
+
+---
+
+Atualizado em: **27 de Fevereiro de 2026**

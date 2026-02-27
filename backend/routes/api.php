@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CrashGameController;
+use App\Http\Controllers\SlotsGameController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,11 @@ Route::middleware('auth:sanctum')->prefix('games/crash')->group(function () {
     Route::get('/current', [CrashGameController::class, 'current']);
     Route::post('/bet', [CrashGameController::class, 'bet']);
     Route::post('/cashout', [CrashGameController::class, 'cashout']);
+});
+
+// Slots Game routes
+Route::middleware('auth:sanctum')->prefix('games/slots')->group(function () {
+    Route::post('/spin', [SlotsGameController::class, 'spin']);
 });
 
 // Fallback for backward compatibility
