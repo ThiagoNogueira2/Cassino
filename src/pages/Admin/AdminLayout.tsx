@@ -9,6 +9,7 @@ import {
   Zap,
   ChevronRight,
   Shield,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Usuários", href: "/admin/users", icon: Users },
+  { label: "Transações", href: "/admin/transactions", icon: ArrowLeftRight },
   { label: "Relatórios", href: "/admin/reports", icon: BarChart3 },
   { label: "Configurações", href: "/admin/settings", icon: Settings },
 ];

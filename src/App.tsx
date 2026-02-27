@@ -12,6 +12,7 @@ import Deposit from "./pages/Deposit/Deposit";
 import Withdraw from "./pages/Withdraw/Withdraw";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminUsers from "./pages/Admin/AdminUsers";
+import AdminTransactions from "./pages/Admin/AdminTransactions";
 import CrashGame from "./pages/games/Crash/Crash";
 import SlotsGame from "./pages/games/Slots/Slots";
 import RouletteGame from "./pages/games/Roulette/Roulette";
@@ -91,6 +92,14 @@ const AppContent = () => {
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+          <Route
+            path="/admin/transactions"
+            element={
+              <AdminRoute>
+                <AdminTransactions />
+              </AdminRoute>
+            }
+          />
           <Route path="/games/crash" element={<GameOrRedirect><CrashGame /></GameOrRedirect>} />
           <Route path="/games/slots" element={<GameOrRedirect><SlotsGame /></GameOrRedirect>} />
           <Route path="/games/slot-machine" element={<GameOrRedirect><SlotsGame /></GameOrRedirect>} />
