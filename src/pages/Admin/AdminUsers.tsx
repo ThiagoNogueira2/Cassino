@@ -57,7 +57,9 @@ function loadUsers(
   setError(null);
   api
     .get("/admin/users", true)
+
     .then((res: { data?: AdminUser[]; total?: number }) => {
+      
       if (res.data) {
         setUsers(res.data);
         setTotal(res.total ?? res.data.length);
