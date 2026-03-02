@@ -1,17 +1,33 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { type User } from "@/mock/data";
 import { api } from "@/lib/api";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  cpf: string;
+  avatar: string;
+  balance: number;
+  level: string;
+  joinedAt: string;
+  role?: "admin" | "user";
+}
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
+  isAdmin: boolean;
   authModal: "login" | "register" | "forgot" | null;
   openAuth: (modal: "login" | "register" | "forgot") => void;
   closeAuth: () => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
+  updateProfile: (data: { name?: string; email?: string; avatar?: string }) => Promise<boolean>;
+  refreshUser: () => Promise<void>;
   logout: () => void;
   loading: boolean;
+  initializing: boolean;
+  loggingOut: boolean;
 }
 
 interface RegisterData {
@@ -27,8 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | "forgot" | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const mapApiUserToUser = useCallback((apiUser: any): User => {
+    const isAdmin = apiUser.role === "admin" || apiUser.email === "admin@cassino.com";
     return {
       id: String(apiUser.id),
       name: apiUser.name,
@@ -38,14 +57,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       balance: Number(apiUser.balance ?? 0),
       level: apiUser.level ?? "VIP Silver",
       joinedAt: apiUser.joinedAt ?? "",
+      role: isAdmin ? "admin" : "user",
     };
   }, []);
 
-  // Carregar usuário ao iniciar se houver token salvo
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       fetchCurrentUser();
+    } else {
+      setInitializing(false);
     }
   }, []);
 
@@ -59,6 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Erro ao buscar usuário atual:", error);
       localStorage.removeItem("token");
       setUser(null);
+    } finally {
+      setInitializing(false);
     }
   };
 
@@ -78,12 +102,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.token) {
         localStorage.setItem("token", response.token);
         
-        // Buscar dados do usuário após login
         if (response.user) {
+        setAuthModal(null);
           setUser(mapApiUserToUser(response.user));
         }
         
-        setAuthModal(null);
         return true;
       }
       return false;
@@ -105,15 +128,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password: data.password,
       });
       
+    
       if (response.token) {
         localStorage.setItem("token", response.token);
         
-        // Buscar dados do usuário após registro
+        setAuthModal(null);
         if (response.user) {
           setUser(mapApiUserToUser(response.user));
         }
         
-        setAuthModal(null);
         return true;
       }
       return false;
@@ -125,13 +148,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [mapApiUserToUser]);
 
-  const logout = useCallback(() => {
+  const updateProfile = useCallback(async (data: { name?: string; email?: string; avatar?: string }): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const response = await api.put("/users/profile", data, true);
+      if (response.user) {
+        setUser(mapApiUserToUser(response.user));
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [mapApiUserToUser]);
+
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const response = await api.get("/auth/me", true);
+      if (response.user) {
+        setUser(mapApiUserToUser(response.user));
+      }
+    } catch {
+      setUser(null);
+    }
+  }, [mapApiUserToUser]);
+
+  const logout = useCallback(async () => {
+    setLoggingOut(true);
+    await new Promise((r) => setTimeout(r, 800));
     localStorage.removeItem("token");
     setUser(null);
+    setLoggingOut(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, authModal, openAuth, closeAuth, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", authModal, openAuth, closeAuth, login, register, updateProfile, refreshUser, logout, loading, initializing, loggingOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { mockWinners } from "@/mock/data";
+import { type Winner } from "@/mock/data";
 import { TrendingUp } from "lucide-react";
 
 export default function WinnersTicker() {
-  const items = [...mockWinners, ...mockWinners]; // duplicate for infinite scroll
+  const items: Winner[] = []; // empty array - no mock data
 
   return (
     <div className="relative overflow-hidden bg-white/[0.02] border-y border-border py-3">
