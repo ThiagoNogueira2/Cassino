@@ -17,6 +17,7 @@ import CrashGame from "./pages/games/Crash/Crash";
 import SlotsGame from "./pages/games/Slots/Slots";
 import RouletteGame from "./pages/games/Roulette/Roulette";
 import BlackjackGame from "./pages/games/Blackjack/Blackjack";
+import ResetPassword from "./pages/ResetPassword";
 import { motion, AnimatePresence } from "framer-motion";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -105,6 +106,7 @@ const AppContent = () => {
           <Route path="/games/slot-machine" element={<GameOrRedirect><SlotsGame /></GameOrRedirect>} />
           <Route path="/games/roulette" element={<GameOrRedirect><RouletteGame /></GameOrRedirect>} />
           <Route path="/games/blackjack" element={<GameOrRedirect><BlackjackGame /></GameOrRedirect>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

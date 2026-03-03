@@ -35,12 +35,24 @@ export const forgotSchema = z.object({
   email: z.string().min(1, "Email obrigatório").email("Email inválido"),
 });
 
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, "Mínimo 6 caracteres"),
+    password_confirmation: z.string().min(1, "Confirme a senha"),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Senhas não conferem",
+    path: ["password_confirmation"],
+  });
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ForgotFormData = z.infer<typeof forgotSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export const authSchemas = {
   login: loginSchema,
   register: registerSchema,
   forgot: forgotSchema,
+  resetPassword: resetPasswordSchema,
 } as const;
