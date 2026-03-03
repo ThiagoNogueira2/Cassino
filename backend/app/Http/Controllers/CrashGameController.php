@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CrashUpdate;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
@@ -21,7 +22,24 @@ class CrashGameController extends Controller
         return response()->json([
             'status' => Cache::get('crash_game_status', 'waiting'),
             'multiplier' => (float) Cache::get('crash_game_multiplier', 1.00),
-            'countdown' => 10
+            'countdown' => Cache::get('crash_game_countdown', 5),
+            'roundId' => Cache::get('crash_game_round_id', null)
+        ]);
+    }
+
+    /**
+     * Retorna o histórico das últimas rodadas.
+     * GET /api/games/crash/history
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $limit = (int) $request->get('limit', 15);
+        $history = Cache::get('crash_game_history', []);
+        
+        $history = array_slice(array_reverse($history), 0, $limit);
+        
+        return response()->json([
+            'data' => $history
         ]);
     }
 
@@ -37,8 +55,7 @@ class CrashGameController extends Controller
         ]);
 
         $user = $request->user();
-        
-        // Garante que a carteira existe
+
         $wallet = $user->wallet;
         if (!$wallet) {
             $wallet = Wallet::create([
@@ -51,28 +68,49 @@ class CrashGameController extends Controller
             return response()->json(['message' => 'Saldo insuficiente'], 400);
         }
 
+        $gameStatus = Cache::get('crash_game_status', 'waiting');
+        if ($gameStatus !== 'betting' && $gameStatus !== 'waiting') {
+            return response()->json(['message' => 'Aguarde a próxima rodada para apostar'], 400);
+        }
+
         return DB::transaction(function () use ($user, $wallet, $validated) {
-            // 1. Debitar saldo (O dinheiro sai da carteira na aposta)
+            // Debita o saldo (O dinheiro sai da carteira na aposta)
             $wallet->balance -= $validated['amount'];
             $wallet->save();
 
             $user->balance -= $validated['amount'];
             $user->save();
 
-            // 2. Criar Transação (Tipo: loss)
+            // Criar Transação (Tipo: loss)
             // Registramos como perda inicialmente. Se ganhar, cria-se uma de ganho depois.
             $transaction = Transaction::create([
                 'user_id' => $user->id,
-                'type' => 'loss', 
+                'type' => 'loss',
                 'amount' => $validated['amount'],
                 'status' => 'approved',
-                'description' => 'Aposta Crash',
+                'description' => 'Aposta Crash - Round: ' . Cache::get('crash_game_round_id', 'unknown'),
             ]);
+
+            // Armazena a aposta em cache para que o loop do jogo a processe
+            $roundId = Cache::get('crash_game_round_id', 'pending');
+            $pendingBets = Cache::get('crash_pending_bets', []);
+            $pendingBets[$transaction->id] = [
+                'id' => $transaction->id,
+                'user_id' => $user->id,
+                'amount' => $validated['amount'],
+                'round_id' => $roundId,
+                'status' => 'pending',
+                'cashed_out' => false,
+                'cashout_multiplier' => null,
+                'created_at' => now()->toIso8601String(),
+            ];
+            Cache::put('crash_pending_bets', $pendingBets, 3600);
 
             return response()->json([
                 'message' => 'Aposta realizada',
-                'betId' => $transaction->id, // Usamos o ID da transação como ID da aposta para simplificar
+                'betId' => $transaction->id,
                 'newBalance' => $wallet->balance,
+                'roundId' => $roundId,
             ]);
         });
     }
@@ -86,14 +124,12 @@ class CrashGameController extends Controller
     {
         $validated = $request->validate([
             'betId' => 'required|exists:transactions,id',
-            // Para testes, permitimos enviar o multiplicador. Em produção, pegue do Cache/Estado do Jogo.
-            'multiplier' => 'nullable|numeric|min:1.01', 
         ]);
 
         $user = $request->user();
         $wallet = $user->wallet;
 
-        // 1. Recuperar a aposta original
+        // Recupera a aposta original
         $betTransaction = Transaction::where('id', $validated['betId'])
             ->where('user_id', $user->id)
             ->where('type', 'loss') // Garante que é a transação de aposta
@@ -103,26 +139,61 @@ class CrashGameController extends Controller
             return response()->json(['message' => 'Aposta não encontrada ou inválida'], 404);
         }
 
-        // 2. Calcular ganho
-        $currentMultiplier = $request->input('multiplier') ?? (float) Cache::get('crash_game_multiplier', 1.00);
+        // Verifica se a aposta está em cache e ainda está pendente
+        $pendingBets = Cache::get('crash_pending_bets', []);
+        if (!isset($pendingBets[$betTransaction->id])) {
+            return response()->json(['message' => 'Aposta já foi processada ou cashout realizada'], 400);
+        }
+
+        $bet = $pendingBets[$betTransaction->id];
+
+        if (!empty($bet['cashed_out'])) {
+            return response()->json(['message' => 'Aposta já foi processada ou cashout realizada'], 400);
+        }
+        
+        // Verifica se o status ainda está "flying"
+        $gameStatus = Cache::get('crash_game_status', 'waiting');
+        if ($gameStatus !== 'flying') {
+            return response()->json(['message' => 'Jogo já crashou ou não está em andamento'], 400);
+        }
+
+        // Obtém o multiplicador atual
+        $currentMultiplier = (float) Cache::get('crash_game_multiplier', 1.00);
+        
+        // Calcula o montante da vitória
         $winAmount = $betTransaction->amount * $currentMultiplier;
 
-        return DB::transaction(function () use ($user, $wallet, $winAmount, $currentMultiplier) {
-            // 3. Adicionar ganho ao saldo
+        return DB::transaction(function () use ($user, $wallet, $winAmount, $currentMultiplier, $bet, $pendingBets, $betTransaction) {
+            // Atualiza a aposta em cache como saque realizado
+            $bet['cashed_out'] = true;
+            $bet['cashout_multiplier'] = $currentMultiplier;
+            $bet['status'] = 'won';
+            $pendingBets[$betTransaction->id] = $bet;
+            Cache::put('crash_pending_bets', $pendingBets, 3600);
+
+            // Adiciona ganho ao saldo
             $wallet->balance += $winAmount;
             $wallet->save();
 
             $user->balance += $winAmount;
             $user->save();
 
-            // 4. Criar Transação (Tipo: win)
+            // Criaa Transação (win)
             Transaction::create([
                 'user_id' => $user->id,
                 'type' => 'win',
                 'amount' => $winAmount,
                 'status' => 'approved',
-                'description' => "Vitória Crash (x{$currentMultiplier})",
+                'description' => "Cashout Crash (x{$currentMultiplier})",
             ]);
+
+            event(new CrashUpdate('player_cashout', [
+                'playerId' => $user->id,
+                'playerName' => $user->name,
+                'multiplier' => $currentMultiplier,
+                'winAmount' => $winAmount,
+                'betId' => $betTransaction->id,
+            ]));
 
             return response()->json([
                 'message' => 'Cashout realizado',

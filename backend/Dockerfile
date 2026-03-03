@@ -21,6 +21,11 @@ RUN apk add --no-cache \
     gd \
     opcache
 
+# Instalar extensão Redis
+RUN apk add --no-cache ${PHPIZE_DEPS} \
+    && pecl install redis \
+    && docker-php-ext-enable redis
+
 # Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 

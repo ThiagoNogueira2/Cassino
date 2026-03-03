@@ -12,23 +12,28 @@ class CrashUpdate implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $type; // 'multiplier', 'crashed', 'countdown'
-    public $payload;
+    public $type;
+    public $data;
 
-    public function __construct($type, $payload)
+    /**
+     * Create a new event instance.
+     *
+     * @param string $type
+     * @param mixed $data
+     */
+    public function __construct(string $type, $data)
     {
         $this->type = $type;
-        $this->payload = $payload;
+        $this->data = $data;
     }
 
     public function broadcastOn()
     {
-        // O frontend vai escutar no canal 'crash-game'
         return new Channel('crash-game');
     }
 
     public function broadcastAs()
     {
-        return 'game_update';
+        return 'game.update';
     }
 }

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Events\CrashUpdate;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class CrashGameLoop extends Command
 {
@@ -15,6 +16,16 @@ class CrashGameLoop extends Command
     {
         $this->info("Iniciando motor do Crash...");
 
+        // Inicializa o histórico se não existir
+        if (!Cache::has('crash_game_history')) {
+            Cache::put('crash_game_history', [], 0);
+        }
+
+        // Garante que o ID da rodada inicial exista
+        if (!Cache::has('crash_game_round_id')) {
+            Cache::put('crash_game_round_id', 'round_' . Str::random(8));
+        }
+
         while (true) {
             $this->runRound();
         }
@@ -22,43 +33,76 @@ class CrashGameLoop extends Command
 
     protected function runRound()
     {
-        // 1. Fase de Apostas (Countdown)
-        $this->broadcast('status', ['status' => 'betting']);
-        for ($i = 5; $i > 0; $i--) {
+        $roundId = Cache::get('crash_game_round_id');
+
+        // Fase de Apostas (Countdown) - 10 segundos para apostar
+        Cache::put('crash_game_status', 'betting');
+        $this->broadcast('status', ['status' => 'betting', 'roundId' => $roundId]);
+
+        for ($i = 10; $i > 0; $i--) {
+            Cache::put('crash_game_countdown', $i);
             $this->broadcast('countdown', ['seconds' => $i]);
             sleep(1);
         }
 
-        // 2. Definir ponto de Crash (Lógica simplificada)
-        // Exemplo: 1% de chance de crashar no 1.00x
+        // Defineo ponto de Crash (LIMITADO A 5x MÁXIMO)
+        // 5% de chance de crash instantâneo (1.00x - 1.20x)
+        // 40% de chance de crash baixo (1.20x - 2.00x)
+        // 35% de chance de crash médio (2.00x - 3.50x)
+        // 20% de chance de crash alto (3.50x - 5.00x)
         $crashPoint = $this->generateCrashPoint();
-        
+
         // Salvar estado no Cache para o Controller acessar
         Cache::put('crash_game_status', 'flying');
         Cache::put('crash_game_multiplier', 1.00);
+        Cache::put('crash_game_countdown', null);
 
-        // 3. Fase de Voo (Subir multiplicador)
+        // Fase de Voo (Subir multiplicador LENTAMENTE)
         $multiplier = 1.00;
         $this->info("Voando... Vai crashar em {$crashPoint}x");
 
         while ($multiplier < $crashPoint) {
-            // Aumenta o multiplicador (exponencial simples)
-            $multiplier += 0.01 + ($multiplier * 0.0002); 
-            
-            // Atualiza cache e envia WebSocket
-            Cache::put('crash_game_multiplier', $multiplier);
-            $this->broadcast('multiplier', ['multiplier' => round($multiplier, 2)]);
+            // Aumenta o multiplicador (0.01 por vez)
+            $multiplier += 0.01;
 
-            // Pausa pequena para simular o tempo (100ms)
-            usleep(100000); 
+            // Atualiza cache e envia WebSocket
+            $roundedMultiplier = round($multiplier, 2);
+            Cache::put('crash_game_multiplier', $roundedMultiplier);
+            $this->broadcast('multiplier', ['multiplier' => $roundedMultiplier]);
+
+            // Pausa de 100ms para cada incremento (para testes)
+            // 1x a 3x = 200 incrementos = 20 segundos no máximo
+            usleep(100000);
         }
 
-        // 4. Crash!
+        // Crash
         Cache::put('crash_game_status', 'crashed');
-        $this->broadcast('crash', ['multiplier' => $crashPoint]);
+        Cache::put('crash_game_multiplier', $crashPoint);
+        $this->broadcast('crash', ['multiplier' => $crashPoint, 'roundId' => $roundId]);
         $this->info("Crashou em {$crashPoint}x");
 
-        // Espera antes da próxima rodada
+        // Salva para o histórico
+        $history = Cache::get('crash_game_history', []);
+        $history[] = [
+            'id' => $roundId,
+            'multiplier' => $crashPoint,
+            'timestamp' => now()->toIso8601String(),
+            'hash' => hash('sha256', $roundId . $crashPoint . time()),
+        ];
+        // Mantém apenas as últimas 100 rodadas
+        $history = array_slice($history, -100);
+        Cache::put('crash_game_history', $history, 0);
+
+        // Processa todas as apostas pendentes como perdidas
+        $this->processLosingBets($roundId);
+
+        // Prepara a Próxima Rodada (Waiting/Cooldown)
+        $nextRoundId = 'round_' . Str::random(8);
+        Cache::put('crash_game_round_id', $nextRoundId);
+
+        Cache::put('crash_game_status', 'waiting');
+        $this->broadcast('status', ['status' => 'waiting', 'roundId' => $nextRoundId]);
+
         sleep(3);
     }
 
@@ -69,10 +113,47 @@ class CrashGameLoop extends Command
 
     private function generateCrashPoint()
     {
-        // Algoritmo simples de Provably Fair (exemplo)
-        // Gera um número entre 1.00 e 100.00
-        // Na vida real, use hash chains
-        if (rand(1, 100) <= 3) return 1.00; // 3% de chance de crash instantâneo
-        return round(100 / rand(1, 100), 2); // Exemplo matemático básico
+        // Distribuição controlada para testes (MÁXIMO 3x)
+        
+        // 10% de chance de crash instantâneo (1.00x - 1.30x)
+        if (mt_rand(1, 100) <= 10) {
+            return round(1.00 + (mt_rand(0, 30) / 100), 2);
+        }
+
+        // 50% de chance de crash baixo (1.30x - 1.80x)
+        if (mt_rand(1, 100) <= 50) {
+            return round(1.30 + (mt_rand(0, 50) / 100), 2);
+        }
+
+        // 30% de chance de crash médio (1.80x - 2.50x)
+        if (mt_rand(1, 100) <= 30) {
+            return round(1.80 + (mt_rand(0, 70) / 100), 2);
+        }
+
+        // 10% de chance de crash alto (2.50x - 3.00x) - MÁXIMO 3x
+        return round(2.50 + (mt_rand(0, 50) / 100), 2);
+    }
+
+    private function processLosingBets(string $crashedRoundId)
+    {
+        // Pega todas as apostas pendentes do cache
+        $allBets = Cache::get('crash_pending_bets', []);
+        $betsForNextRound = [];
+        
+        foreach ($allBets as $betId => $bet) {
+            // Se a aposta for referente à rodada que acabou de terminar...
+            if (isset($bet['round_id']) && $bet['round_id'] === $crashedRoundId) {
+                // ...e não sacou antes, é uma perda(loss).
+                if (empty($bet['cashed_out'])) {
+                    $this->info("Bet {$betId} for round {$crashedRoundId} lost.");
+                }
+            } else {
+                // Essa aposta pertence a uma rodada diferente (provavelmente a próxima), então é mantida.
+                $betsForNextRound[$betId] = $bet;
+            }
+        }
+        
+        // Sobreescreve o cache apenas pelas apostas da próxima rodada.
+        Cache::put('crash_pending_bets', $betsForNextRound, 3600);
     }
 }

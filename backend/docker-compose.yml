@@ -77,6 +77,41 @@ services:
     networks:
       - velvet-network
 
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: velvet-reverb
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-velvet_stake}
+      - DB_USERNAME=${DB_USERNAME:-velvet}
+      - DB_PASSWORD=${DB_PASSWORD:-secret123}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - BROADCAST_DRIVER=reverb
+      - REVERB_APP_ID=${REVERB_APP_ID:-crash-app}
+      - REVERB_APP_KEY=${REVERB_APP_KEY:-crash-game-key}
+      - REVERB_APP_SECRET=${REVERB_APP_SECRET:-crash-game-secret}
+      - REVERB_HOST=0.0.0.0
+      - REVERB_PORT=6003
+    ports:
+      - "${REVERB_PORT:-6003}:6003"
+    volumes:
+      - ./:/app
+      - vendor_data:/app/vendor
+    networks:
+      - velvet-network
+    depends_on:
+      - postgres
+      - redis
+    command: >
+      sh -c "php artisan reverb:start --host=0.0.0.0 --port=6003"
+
 volumes:
   postgres_data:
   redis_data:

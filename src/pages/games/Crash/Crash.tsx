@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, TrendingUp, Send } from "lucide-react";
@@ -11,6 +11,8 @@ import { useBalance } from "@/context/BalanceContext";
 import { useAuth } from "@/context/AuthContext";
 import { type CrashHistory, type ChatMessage } from "@/mock/data";
 import { useToast } from "@/hooks/use-toast";
+import { useCrashWebSocket } from "@/hooks/useCrashWebSocket";
+import { useCrashAPI } from "@/hooks/useCrashAPI";
 import type { GamePhase } from "./types";
 import { CrashCanvas } from "./components/CrashCanvas";
 
@@ -21,91 +23,247 @@ export default function CrashGame() {
   const [countdown, setCountdown] = useState(5);
   const [betAmount, setBetAmount] = useState("10");
   const [activeBet, setActiveBet] = useState<number | null>(null);
+  const [activeBetId, setActiveBetId] = useState<string | null>(null);
   const [cashedOut, setCashedOut] = useState(false);
   const [history, setHistory] = useState<CrashHistory[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const crashAtRef = useRef(1.0);
 
   const { balance, addBalance, subtractBalance, addBet, addTransaction } = useBalance();
-  const { isLoggedIn, openAuth } = useAuth();
+  const { isLoggedIn, openAuth, user } = useAuth();
   const { toast } = useToast();
+  const { placeBet: apiPlaceBet, cashout: apiCashout, getHistory, getCurrentState } = useCrashAPI();
 
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    let timer: ReturnType<typeof setTimeout>;
+  // Handle WebSocket events
+  const handleRoundStart = useCallback(() => {
+    console.log("[Crash] Round starting - betting phase");
+    setPhase("betting");
+    setCountdown(10); // Backend agora usa 10s
+    setMultiplier(1.0);
+    setCrashed(false);
+    setCashedOut(false);
+  }, []);
 
-    if (phase === "waiting") {
-      setCountdown(5);
-      setMultiplier(1.0);
-      setCrashed(false);
-      setCashedOut(false);
-      interval = setInterval(() => {
-        setCountdown((c) => {
-          if (c <= 1) {
-            clearInterval(interval);
-            setPhase("flying");
-            return 0;
-          }
-          return c - 1;
-        });
-      }, 1000);
-    } else if (phase === "flying") {
-      crashAtRef.current = 1.0 + Math.random() * 19;
-      interval = setInterval(() => {
-        setMultiplier((m) => {
-          const next = m + m * 0.035;
-          if (next >= crashAtRef.current) {
-            clearInterval(interval);
-            setCrashed(true);
-            setPhase("crashed");
+  const handleCountdown = useCallback((seconds: number) => {
+    console.log(`[Crash] Countdown: ${seconds}s`);
+    // Evitar atualizações muito rápidas
+    setCountdown(seconds);
+    setPhase("betting"); // Sempre atualiza para betting durante countdown
+    if (seconds === 0) {
+      setPhase("flying");
+    }
+  }, []);
 
-           
-            setActiveBet((bet) => {
-              if (bet !== null) {
-                toast({ title: "Crash!", description: `A rodada crashou em ${next.toFixed(2)}x. Você perdeu R$ ${bet.toFixed(2)}`, variant: "destructive" });
-                addBet({ game: "Crash", betAmount: bet, result: 0, profit: -bet, outcome: "loss" });
-              }
-              return null;
-            });
+  const handleMultiplierUpdate = useCallback((newMultiplier: number) => {
+    // Evitar atualizações duplicadas
+    setMultiplier((prev) => {
+      if (newMultiplier <= prev) return prev; // Só atualiza se aumentou
+      return newMultiplier;
+    });
+    setPhase("flying");
+    setCrashed(false);
+  }, []);
 
-            timer = setTimeout(() => {
-              setHistory((prev) => [{ multiplier: parseFloat(next.toFixed(2)), timestamp: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) }, ...prev.slice(0, 14)]);
-              setPhase("waiting");
-            }, 3000);
-            return next;
-          }
-          return next;
-        });
-      }, 100);
+  const handleRoundCrash = useCallback((crashMultiplier: number) => {
+    console.log(`[Crash] Crashed at ${crashMultiplier}x`);
+    
+    // Evitar crash duplicado
+    setCrashed((prev) => {
+      if (prev) return true; // Já está crashed
+      setMultiplier(crashMultiplier);
+      setPhase("crashed");
+      return true;
+    });
+
+    // Handle loss if player didn't cash out
+    if (activeBet !== null && !cashedOut) {
+      toast({
+        title: "Crash!",
+        description: `A rodada crashou em ${crashMultiplier.toFixed(2)}x. Você perdeu R$ ${activeBet.toFixed(2)}`,
+        variant: "destructive",
+      });
+      addBet({
+        game: "Crash",
+        betAmount: activeBet,
+        result: 0,
+        profit: -activeBet,
+        outcome: "loss",
+      });
     }
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
-    };
-  }, [phase, toast, addBet]);
+    // Clear bet state
+    setActiveBet(null);
+    setActiveBetId(null);
+    setCashedOut(false);
 
-  const handleBet = () => {
-    if (!isLoggedIn) { openAuth("login"); return; }
+    // Fetch new history after crash (delay para garantir que backend salvou)
+    setTimeout(() => {
+      getHistory(15).then((newHistory) => {
+        setHistory(newHistory);
+      });
+    }, 500);
+  }, [activeBet, cashedOut, toast, addBet, getHistory]);
+
+  // Connect to WebSocket
+  useCrashWebSocket({
+    enabled: true,
+    onRoundStart: handleRoundStart,
+    onCountdown: handleCountdown,
+    onMultiplierUpdate: handleMultiplierUpdate,
+    onRoundCrash: handleRoundCrash,
+  });
+
+  // Persist active bet in localStorage to handle page reloads
+  useEffect(() => {
+    const savedBet = localStorage.getItem("crash_active_bet");
+    const savedBetId = localStorage.getItem("crash_active_bet_id");
+    if (savedBet && savedBetId && !activeBet) {
+      setActiveBet(parseFloat(savedBet));
+      setActiveBetId(savedBetId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeBet && activeBetId) {
+      localStorage.setItem("crash_active_bet", activeBet.toString());
+      localStorage.setItem("crash_active_bet_id", activeBetId);
+    } else {
+      localStorage.removeItem("crash_active_bet");
+      localStorage.removeItem("crash_active_bet_id");
+    }
+  }, [activeBet, activeBetId]);
+
+  // Initial load and connection effect
+  useEffect(() => {
+    // Fetch initial history
+    getHistory(15).then((data) => {
+      if (data.length > 0) {
+        setHistory(data);
+      }
+    });
+
+    // Fetch current state to sync immediately
+    getCurrentState().then((state) => {
+      if (state) {
+        console.log("[Crash] Initial state synced:", state);
+        if (state.status === "betting") {
+          setPhase("betting");
+          setCountdown(state.countdown || 10);
+          setMultiplier(1.0);
+        } else if (state.status === "flying") {
+          setPhase("flying");
+          setMultiplier(state.multiplier);
+          setCrashed(false);
+        } else if (state.status === "crashed") {
+          setPhase("crashed");
+          setMultiplier(state.multiplier);
+          setCrashed(true);
+        } else {
+          setPhase("waiting");
+          setMultiplier(1.0);
+          setCrashed(false);
+        }
+      }
+    });
+
+    // Sync state every 5 seconds to prevent drift
+    const syncInterval = setInterval(() => {
+      getCurrentState().then((state) => {
+        if (state) {
+          // Only sync if phase is different (prevent flickering)
+          if (state.status !== phase) {
+            console.log("[Crash] Syncing state:", state);
+            if (state.status === "betting") {
+              setPhase("betting");
+              setCountdown(state.countdown || 10);
+            } else if (state.status === "flying") {
+              setPhase("flying");
+              setMultiplier(state.multiplier);
+            } else if (state.status === "crashed") {
+              setPhase("crashed");
+              setMultiplier(state.multiplier);
+              setCrashed(true);
+            }
+          }
+        }
+      });
+    }, 5000);
+
+    return () => clearInterval(syncInterval);
+  }, [getHistory, getCurrentState]);
+
+  const handleBet = async () => {
+    if (!isLoggedIn) {
+      openAuth("login");
+      return;
+    }
     const amount = parseFloat(betAmount);
-    if (isNaN(amount) || amount <= 0) { toast({ title: "Valor inválido", variant: "destructive" }); return; }
-    if (amount > balance) { toast({ title: "Saldo insuficiente", variant: "destructive" }); return; }
-    if (phase !== "waiting") { toast({ title: "Aguarde a próxima rodada", variant: "destructive" }); return; }
-    subtractBalance(amount);
-    setActiveBet(amount);
-    toast({ title: "Aposta registrada!", description: `R$ ${amount.toFixed(2)} apostado` });
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: "Valor inválido", variant: "destructive" });
+      return;
+    }
+    if (amount > balance) {
+      toast({ title: "Saldo insuficiente", variant: "destructive" });
+      return;
+    }
+    if (phase !== "betting" && phase !== "waiting") {
+      toast({ title: "Aguarde a próxima rodada", description: `Fase atual: ${phase}`, variant: "destructive" });
+      return;
+    }
+
+    console.log("[Crash] Placing bet:", { amount, phase, balance });
+    
+    // Place bet via API
+    const result = await apiPlaceBet(amount);
+    console.log("[Crash] Bet result:", result);
+    if (result) {
+      subtractBalance(amount);
+      setActiveBet(amount);
+      setActiveBetId(result.betId);
+      toast({
+        title: "✅ Aposta confirmada!",
+        description: `R$ ${amount.toFixed(2)} apostado na rodada ${result.roundId || 'atual'}`,
+      });
+    }
   };
 
-  const handleCashout = () => {
-    if (!activeBet || cashedOut || phase !== "flying") return;
-    const winAmount = activeBet * multiplier;
-    addBalance(winAmount);
-    addTransaction({ type: "win", amount: winAmount, status: "approved", description: `Cashout no Crash ${multiplier.toFixed(2)}x` });
-    addBet({ game: "Crash", betAmount: activeBet, result: multiplier, profit: winAmount - activeBet, outcome: "win" });
-    setCashedOut(true);
-    setActiveBet(null);
-    toast({ title: `Cashout! ${multiplier.toFixed(2)}x`, description: `Você ganhou R$ ${winAmount.toFixed(2)}!` });
+  const handleCashout = async () => {
+    if (!activeBet || cashedOut || phase !== "flying") {
+      console.log("[Crash] Cannot cashout:", { activeBet, cashedOut, phase });
+      return;
+    }
+
+    console.log("[Crash] Cashing out:", { activeBet, activeBetId, multiplier });
+
+    // Cashout via API
+    if (activeBetId) {
+      const result = await apiCashout(activeBetId);
+      console.log("[Crash] Cashout result:", result);
+      if (result) {
+        const winAmount = result.winAmount;
+        addBalance(winAmount);
+        addTransaction({
+          type: "win",
+          amount: winAmount,
+          status: "approved",
+          description: `Cashout no Crash ${result.multiplier.toFixed(2)}x`,
+        });
+        addBet({
+          game: "Crash",
+          betAmount: activeBet,
+          result: result.multiplier,
+          profit: winAmount - activeBet,
+          outcome: "win",
+        });
+        setCashedOut(true);
+        setActiveBet(null);
+        setActiveBetId(null);
+        toast({
+          title: `✅ Cashout! ${result.multiplier.toFixed(2)}x`,
+          description: `Você ganhou R$ ${winAmount.toFixed(2)}!`,
+        });
+      }
+    }
   };
 
   const sendChat = () => {
@@ -141,9 +299,9 @@ export default function CrashGame() {
 
               
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  {phase === "waiting" ? (
+                  {phase === "betting" ? (
                     <motion.div
-                      key="waiting"
+                      key="betting"
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       className="text-center"
@@ -215,11 +373,11 @@ export default function CrashGame() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    {phase === "waiting" && !activeBet ? (
+                    {(phase === "betting" || phase === "waiting") && !activeBet ? (
                       <Button
                         className="flex-1 gradient-primary border-0 text-white font-black"
                         onClick={handleBet}
-                        disabled={phase !== "waiting"}
+                        disabled={phase !== "betting" && phase !== "waiting"}
                       >
                         Apostar R$ {parseFloat(betAmount || "0").toFixed(2)}
                       </Button>
@@ -304,4 +462,3 @@ export default function CrashGame() {
     </div>
   );
 }
-

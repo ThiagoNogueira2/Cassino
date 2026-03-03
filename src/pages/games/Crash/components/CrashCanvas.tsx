@@ -10,11 +10,14 @@ interface CrashCanvasProps {
 export function CrashCanvas({ multiplier, crashed, phase }: CrashCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointsRef = useRef<{ x: number; y: number }[]>([]);
+  const prevMultiplierRef = useRef<number>(1);
   const animFrameRef = useRef<number>(0);
 
+  // Reset points when phase changes
   useEffect(() => {
-    if (phase === "waiting") {
+    if (phase === "waiting" || phase === "betting") {
       pointsRef.current = [];
+      prevMultiplierRef.current = 1;
     }
   }, [phase]);
 
@@ -40,12 +43,13 @@ export function CrashCanvas({ multiplier, crashed, phase }: CrashCanvasProps) {
       ctx.stroke();
     }
 
-    if (phase === "flying" || phase === "crashed") {
-      // Add point
+    if ((phase === "flying" || phase === "crashed") && multiplier > prevMultiplierRef.current) {
+      // Only add point if multiplier increased
       const progress = Math.min((multiplier - 1) / 20, 1);
       const x = W * 0.05 + progress * W * 0.88;
       const y = H * 0.9 - Math.pow(progress, 1.5) * H * 0.8;
       pointsRef.current.push({ x, y });
+      prevMultiplierRef.current = multiplier;
 
       if (pointsRef.current.length > 1) {
         // Fill area

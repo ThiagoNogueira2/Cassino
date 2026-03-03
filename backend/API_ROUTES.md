@@ -1,4 +1,5 @@
 # Rotas da API
+Na raíz do projeto execute "./start-project.sh" para iniciar os containers e jogos
 
 ## Health Check
 
@@ -709,10 +710,19 @@ GET /api/transactions?type=deposit&status=approved&page=1&limit=20
 ---
 
 ## Jogo — Crash
-Por ora é necessário rodar o comando "./docker-artisan.sh game:crash-loop" para iniciar o loop do jogo.
+
+**Descrição:** Jogo de apostas em tempo real onde o multiplicador sobe até "crashar". Os jogadores devem retirar antes do crash para ganhar.
+
+**Configurações Atuais:**
+- **Tempo de aposta:** 10 segundos
+- **Multiplicador máximo:** 3.00x
+- **Velocidade:** 0.01 a cada 100ms
+- **Duração máxima da rodada:** ~20 segundos
+
+---
 
 ### GET `/api/games/crash/current`
-Retorna o estado da rodada atual do Crash.
+Retorna o estado da rodada atual.
 
 **Resposta (200):**
 ```json
@@ -724,7 +734,11 @@ Retorna o estado da rodada atual do Crash.
 }
 ```
 
-**Status possíveis:** `waiting`, `flying`, `crashed`
+**Status possível:**
+- `waiting` - Aguardando próxima rodada
+- `betting` - Fase de apostas (temporizador 10s)
+- `flying` - Multiplicador subindo
+- `crashed` - Rodada finalizada
 
 ---
 
@@ -757,7 +771,7 @@ Retorna o histórico das últimas rodadas.
 ---
 
 ### POST `/api/games/crash/bet`
-Registra aposta na próxima rodada do Crash.
+Registra aposta na próxima rodada do Crash. Desconta o valor da carteira e cria transação.
 
 **Headers:**
 ```
@@ -775,20 +789,31 @@ Content-Type: application/json
 **Resposta (201):**
 ```json
 {
-  "message": "Bet placed successfully",
-  "bet": {
-    "id": "bet_123",
-    "amount": 50.00,
-    "roundId": "round_abc123",
-    "status": "pending"
-  }
+  "message": "Aposta realizada",
+  "betId": "123",
+  "newBalance": 950.00,
+  "roundId": "round_abc123"
+}
+```
+
+**Resposta (400) - Saldo insuficiente:**
+```json
+{
+  "message": "Saldo insuficiente"
+}
+```
+
+**Resposta (400) - Fora da fase de aposta:**
+```json
+{
+  "message": "Aguarde a próxima rodada para apostar"
 }
 ```
 
 ---
 
 ### POST `/api/games/crash/cashout`
-Faz cashout durante o voo do Crash.
+Faz cashout durante o voo do Crash. Adiciona o ganho à carteira.
 
 **Headers:**
 ```
@@ -799,33 +824,91 @@ Content-Type: application/json
 **Body:**
 ```json
 {
-  "betId": "bet_123"
+  "betId": "123"
 }
 ```
 
 **Resposta (200):**
 ```json
 {
-  "message": "Cashout successful",
+  "message": "Cashout realizado",
+  "winAmount": 122.50,
   "multiplier": 2.45,
-  "payout": 122.50,
   "newBalance": 1122.50
+}
+```
+
+**Resposta (400) - Jogo já crashou:**
+```json
+{
+  "message": "Jogo já crashou ou não está em andamento"
+}
+```
+
+**Resposta (400) - Cashout já realizado:**
+```json
+{
+  "message": "Aposta já foi processada ou cashout realizada"
+}
+```
+
+**Resposta (404) - Aposta não encontrada:**
+```json
+{
+  "message": "Aposta não encontrada ou inválida"
 }
 ```
 
 ---
 
-### ⚡ WebSocket: `ws://host/ws/crash`
+### WebSocket: `ws://localhost:6003`
+
+**Canal:** `crash-game`  
+**Evento:** `.game.update`
 
 **Eventos emitidos pelo servidor:**
 
-| Evento | Descrição |
-| :--- | :--- |
-| `round_start` | Nova rodada iniciada, contagem regressiva |
-| `multiplier_update` | Multiplicador em tempo real |
-| `round_crash` | Rodada crashou + multiplicador final |
-| `player_cashout` | Jogador fez cashout (público) |
-| `countdown` | Contagem regressiva para próxima rodada |
+| Evento | Dados | Descrição |
+| :--- | :--- | :--- |
+| `status` | `{ status: 'betting', roundId: 'round_XXX' }` | Nova rodada iniciada |
+| `countdown` | `{ seconds: 10 }` | Contagem regressiva (10s → 0s) |
+| `multiplier` | `{ multiplier: 1.25 }` | Atualização do multiplicador |
+| `crash` | `{ multiplier: 2.45, roundId: 'round_XXX' }` | Rodada crashou |
+| `player_cashout` | `{ playerId: 1, multiplier: 1.5, winAmount: 75 }` | Jogador fez cashout |
+
+**Exemplo de fluxo:**
+```
+1. status: { status: 'betting', roundId: 'round_abc' }
+2. countdown: { seconds: 10 }
+3. countdown: { seconds: 9 }
+...
+4. countdown: { seconds: 0 }
+5. status: { status: 'flying' }
+6. multiplier: { multiplier: 1.01 }
+7. multiplier: { multiplier: 1.02 }
+...
+8. multiplier: { multiplier: 2.45 }
+9. crash: { multiplier: 2.45, roundId: 'round_abc' }
+10. status: { status: 'waiting', roundId: 'round_xyz' }
+```
+
+---
+
+### Game Loop (Backend)
+
+O jogo é gerenciado pelo comando `php artisan game:crash-loop`, que roda em background e:
+
+1. **Fase Betting (10s):** Aguarda apostas
+2. **Fase Flying:** Multiplicador sobe de 0.01 em 0.01 a cada 100ms
+3. **Crash:** Multiplicador crasha em ponto aleatório (1x - 3x)
+4. **Processa Resultados:** Verifica apostas e cashouts
+5. **Fase Waiting (3s):** Prepara próxima rodada
+
+**Distribuição de Crash:**
+- **10%** → Crash instantâneo (1.00x - 1.30x)
+- **50%** → Crash baixo (1.30x - 1.80x)
+- **30%** → Crash médio (1.80x - 2.50x)
+- **10%** → Crash alto (2.50x - 3.00x)
 
 ---
 
