@@ -68,7 +68,7 @@ class CustomResetPasswordNotification extends Notification
     protected function resetUrl($notifiable)
     {
         // Adicione FRONTEND_URL ao seu arquivo .env
-        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+        $frontendUrl = rtrim(config('app.frontend_url', 'http://localhost:5173'), '/');
 
         return $frontendUrl . '/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
     }
