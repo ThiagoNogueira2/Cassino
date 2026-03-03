@@ -22,6 +22,7 @@ interface AuthContextType {
   closeAuth: () => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<boolean>;
   updateProfile: (data: { name?: string; email?: string; avatar?: string }) => Promise<boolean>;
   refreshUser: () => Promise<void>;
   logout: () => void;
@@ -165,6 +166,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [mapApiUserToUser]);
 
+  const forgotPassword = useCallback(async (email: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      await api.post("/auth/forgot-password", { email });
+      return true;
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const refreshUser = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -187,7 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", authModal, openAuth, closeAuth, login, register, updateProfile, refreshUser, logout, loading, initializing, loggingOut }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", authModal, openAuth, closeAuth, login, register, forgotPassword, updateProfile, refreshUser, logout, loading, initializing, loggingOut }}>
       {children}
     </AuthContext.Provider>
   );

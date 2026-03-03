@@ -36,6 +36,15 @@ const SUBTITLES: Record<string, string> = {
   forgot: "Enviaremos um link de recuperação",
 };
 
+const FORM_DEFAULTS = {
+  email: "",
+  password: "",
+  name: "",
+  cpf: "",
+  confirm: "",
+  acceptTerms: false as boolean,
+};
+
 function LoginSuccessView({
   authModal,
   onClose,
@@ -88,7 +97,7 @@ function LoginSuccessView({
 }
 
 export default function AuthModal() {
-  const { authModal, closeAuth, openAuth, login, register: doRegister, loading: authLoading } =
+  const { authModal, closeAuth, openAuth, login, register: doRegister, forgotPassword, loading: authLoading } =
     useAuth();
   const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -98,27 +107,14 @@ export default function AuthModal() {
   const schema = authModal ? authSchemas[authModal] : null;
   const form = useForm<LoginFormData | RegisterFormData | ForgotFormData>({
     resolver: schema ? (zodResolver(schema) as any) : undefined,
-    defaultValues:
-      authModal === "login"
-        ? { email: "", password: "" }
-        : authModal === "register"
-          ? { name: "", email: "", cpf: "", password: "", confirm: "", acceptTerms: false }
-          : authModal === "forgot"
-            ? { email: "" }
-            : {},
+    defaultValues: FORM_DEFAULTS,
   });
 
   useEffect(() => {
     setSuccess(false);
     setApiError("");
     if (authModal) {
-      const defaults =
-        authModal === "login"
-          ? { email: "", password: "" }
-          : authModal === "register"
-            ? { name: "", email: "", cpf: "", password: "", confirm: "", acceptTerms: false }
-            : { email: "" };
-      form.reset(defaults);
+      form.reset(FORM_DEFAULTS);
     }
   }, [authModal]);
 
@@ -146,7 +142,8 @@ export default function AuthModal() {
         if (ok) setSuccess(true);
         else setApiError("Erro ao criar conta. Verifique seus dados e tente novamente.");
       } else if (authModal === "forgot") {
-        await new Promise((r) => setTimeout(r, 1000));
+        const d = data as ForgotFormData;
+        await forgotPassword(d.email);
         setSuccess(true);
       }
     } catch (err: any) {
