@@ -133,64 +133,34 @@ export default function CrashGame() {
     }
   }, [activeBet, activeBetId]);
 
-  // Initial load and connection effect
+  // Carrega estado inicial só uma vez; o WebSocket mantém o resto (evita vários rodando/travando)
   useEffect(() => {
-    // Fetch initial history
+    let cancelled = false;
     getHistory(15).then((data) => {
-      if (data.length > 0) {
-        setHistory(data);
-      }
+      if (!cancelled && data.length > 0) setHistory(data);
     });
-
-    // Fetch current state to sync immediately
     getCurrentState().then((state) => {
-      if (state) {
-        console.log("[Crash] Initial state synced:", state);
-        if (state.status === "betting") {
-          setPhase("betting");
-          setCountdown(state.countdown || 10);
-          setMultiplier(1.0);
-        } else if (state.status === "flying") {
-          setPhase("flying");
-          setMultiplier(state.multiplier);
-          setCrashed(false);
-        } else if (state.status === "crashed") {
-          setPhase("crashed");
-          setMultiplier(state.multiplier);
-          setCrashed(true);
-        } else {
-          setPhase("waiting");
-          setMultiplier(1.0);
-          setCrashed(false);
-        }
+      if (cancelled || !state) return;
+      if (state.status === "betting") {
+        setPhase("betting");
+        setCountdown(state.countdown ?? 10);
+        setMultiplier(1.0);
+      } else if (state.status === "flying") {
+        setPhase("flying");
+        setMultiplier(state.multiplier);
+        setCrashed(false);
+      } else if (state.status === "crashed") {
+        setPhase("crashed");
+        setMultiplier(state.multiplier);
+        setCrashed(true);
+      } else {
+        setPhase("waiting");
+        setMultiplier(1.0);
+        setCrashed(false);
       }
     });
-
-    // Sync state every 5 seconds to prevent drift
-    const syncInterval = setInterval(() => {
-      getCurrentState().then((state) => {
-        if (state) {
-          // Only sync if phase is different (prevent flickering)
-          if (state.status !== phase) {
-            console.log("[Crash] Syncing state:", state);
-            if (state.status === "betting") {
-              setPhase("betting");
-              setCountdown(state.countdown || 10);
-            } else if (state.status === "flying") {
-              setPhase("flying");
-              setMultiplier(state.multiplier);
-            } else if (state.status === "crashed") {
-              setPhase("crashed");
-              setMultiplier(state.multiplier);
-              setCrashed(true);
-            }
-          }
-        }
-      });
-    }, 5000);
-
-    return () => clearInterval(syncInterval);
-  }, [getHistory, getCurrentState]);
+    return () => { cancelled = true; };
+  }, []);
 
   const handleBet = async () => {
     if (!isLoggedIn) {
@@ -312,7 +282,7 @@ export default function CrashGame() {
                   ) : crashed ? (
                     <motion.div
                       key="crashed"
-                      initial={{ scale: 0.5, opacity: 0 }}
+                      initial={{ scale: 0.5, opacity: 0 }}n
                       animate={{ scale: 1, opacity: 1 }}
                       className="text-center"
                     >

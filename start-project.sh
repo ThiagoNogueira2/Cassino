@@ -12,9 +12,11 @@ cd backend
 docker-compose up -d
 sleep 5
 
-# 2. Iniciar Game Loop (roda dentro do container app)
-echo "🎮 Iniciando Crash Game Loop..."
-docker-compose exec -Td app php artisan game:crash-loop &
+# 2. Um único Game Loop (mata qualquer um antigo e sobe um novo)
+echo "🎮 Iniciando Crash Game Loop (único)..."
+docker-compose exec -T app pkill -f "game:crash-loop" 2>/dev/null || true
+sleep 1
+docker-compose exec -Td app php artisan game:crash-loop
 sleep 2
 
 cd ..
