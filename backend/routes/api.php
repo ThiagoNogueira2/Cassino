@@ -86,11 +86,14 @@ Route::middleware('auth:sanctum')->prefix('transactions')->group(function () {
 });
 
 // Crash Game routes
-Route::middleware('auth:sanctum')->prefix('games/crash')->group(function () {
+Route::prefix('games/crash')->group(function () {
     Route::get('/current', [CrashGameController::class, 'current']);
     Route::get('/history', [CrashGameController::class, 'history']);
-    Route::post('/bet', [CrashGameController::class, 'bet']);
-    Route::post('/cashout', [CrashGameController::class, 'cashout']);
+    
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/bet', [CrashGameController::class, 'bet']);
+        Route::post('/cashout', [CrashGameController::class, 'cashout']);
+    });
 });
 
 // Slots Game routes

@@ -18,12 +18,12 @@ class CrashGameLoop extends Command
 
         // Inicializa o histórico se não existir
         if (!Cache::has('crash_game_history')) {
-            Cache::put('crash_game_history', [], 0);
+            Cache::forever('crash_game_history', []);
         }
 
         // Garante que o ID da rodada inicial exista
         if (!Cache::has('crash_game_round_id')) {
-            Cache::put('crash_game_round_id', 'round_' . Str::random(8));
+            Cache::forever('crash_game_round_id', 'round_' . Str::random(8));
         }
 
         while (true) {
@@ -91,7 +91,7 @@ class CrashGameLoop extends Command
         ];
         // Mantém apenas as últimas 100 rodadas
         $history = array_slice($history, -100);
-        Cache::put('crash_game_history', $history, 0);
+        Cache::forever('crash_game_history', $history);
 
         // Processa todas as apostas pendentes como perdidas
         $this->processLosingBets($roundId);

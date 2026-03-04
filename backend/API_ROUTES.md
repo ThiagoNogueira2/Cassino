@@ -743,7 +743,7 @@ Retorna o estado da rodada atual.
 ---
 
 ### GET `/api/games/crash/history`
-Retorna o histórico das últimas rodadas.
+Retorna o histórico das últimas 15 rodadas.
 
 **Query Params:**
 - `limit`: Limite de resultados (default: 15)
@@ -895,7 +895,6 @@ Content-Type: application/json
 ---
 
 ### Game Loop (Backend)
-
 O jogo é gerenciado pelo comando `php artisan game:crash-loop`, que roda em background e:
 
 1. **Fase Betting (10s):** Aguarda apostas
