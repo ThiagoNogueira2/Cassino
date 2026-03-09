@@ -133,7 +133,6 @@ export default function CrashGame() {
     }
   }, [activeBet, activeBetId]);
 
-  // Carrega estado inicial só uma vez; o WebSocket mantém o resto (evita vários rodando/travando)
   useEffect(() => {
     let cancelled = false;
     getHistory(15).then((data) => {

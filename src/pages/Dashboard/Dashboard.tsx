@@ -34,6 +34,8 @@ export default function DashboardPage() {
   const [email, setEmail] = useState("");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [apostas, setApostas] = useState<Transaction[]>([]);
+  const [loadingApostas, setLoadingApostas] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -41,7 +43,7 @@ export default function DashboardPage() {
       try {
         const res = await transactionsApi.list();
         const data = Array.isArray(res) ? res : (res?.data ?? []);
-        setTransactions(data);
+        setTransactions(Array.isArray(data) ? data : []);
       } catch {
         setTransactions([]);
       } finally {
@@ -50,6 +52,34 @@ export default function DashboardPage() {
     };
 
     fetchTransactions();
+  }, []);
+
+  useEffect(() => {
+    const fetchApostas = async () => {
+      setLoadingApostas(true);
+      try {
+        const [resWin, resLoss] = await Promise.all([
+          transactionsApi.list({ type: "win", limit: 50 }),
+          transactionsApi.list({ type: "loss", limit: 50 }),
+        ]);
+        const winData = Array.isArray(resWin) ? resWin : (resWin?.data ?? []);
+        const lossData = Array.isArray(resLoss) ? resLoss : (resLoss?.data ?? []);
+        const winList = Array.isArray(winData) ? winData : [];
+        const lossList = Array.isArray(lossData) ? lossData : [];
+        const todas = [...winList, ...lossList].sort((a, b) => {
+          const da = typeof a.date === "string" ? new Date(a.date).getTime() : 0;
+          const db = typeof b.date === "string" ? new Date(b.date).getTime() : 0;
+          return db - da;
+        });
+        setApostas(todas);
+      } catch {
+        setApostas([]);
+      } finally {
+        setLoadingApostas(false);
+      }
+    };
+
+    fetchApostas();
   }, []);
 
   if (!isLoggedIn) {
@@ -142,7 +172,7 @@ export default function DashboardPage() {
               },
               {
                 label: "Apostas",
-                value: betHistory.length,
+                value: apostas.length,
                 icon: History,
                 color: "text-primary",
               },
@@ -204,41 +234,53 @@ export default function DashboardPage() {
 
           {tab === "bets" && (
             <div className="space-y-2">
-              {betHistory.map((bet) => (
-                <div
-                  key={bet.id}
-                  className="card-casino rounded-xl border border-border p-4 flex items-center gap-4"
-                >
-                  <div
-                    className={cn(
-                      "w-2 h-2 rounded-full shrink-0",
-                      bet.outcome === "win"
-                        ? "bg-neon-green"
-                        : "bg-destructive",
-                    )}
-                  />
-                  <div className="flex-1">
-                    <p className="font-bold text-sm">{bet.game}</p>
-                    <p className="text-xs text-muted-foreground">{bet.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">
-                      R$ {bet.betAmount.toFixed(2)}
-                    </p>
-                    <p
-                      className={cn(
-                        "font-bold text-sm",
-                        bet.outcome === "win"
-                          ? "text-neon-green"
-                          : "text-destructive",
-                      )}
-                    >
-                      {bet.outcome === "win" ? "+" : ""}R${" "}
-                      {bet.profit.toFixed(2)}
-                    </p>
-                  </div>
+              {loadingApostas ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  Carregando apostas...
                 </div>
-              ))}
+              ) : apostas.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  Nenhuma aposta encontrada. Jogue Crash, Slots, Roleta ou Blackjack para ver seu histórico aqui.
+                </div>
+              ) : (
+                apostas.map((aposta) => {
+                  const isWin = aposta.type === "win";
+                  const dateFormatted =
+                    typeof aposta.date === "string" && aposta.date.includes("T")
+                      ? new Date(aposta.date).toLocaleString("pt-BR")
+                      : aposta.date;
+                  return (
+                    <div
+                      key={aposta.id}
+                      className="card-casino rounded-xl border border-border p-4 flex items-center gap-4"
+                    >
+                      <div
+                        className={cn(
+                          "w-2 h-2 rounded-full shrink-0",
+                          isWin ? "bg-neon-green" : "bg-destructive",
+                        )}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm truncate">{aposta.description}</p>
+                        <p className="text-xs text-muted-foreground">{dateFormatted}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p
+                          className={cn(
+                            "font-black text-sm",
+                            isWin ? "text-neon-green" : "text-destructive",
+                          )}
+                        >
+                          {isWin ? "+" : "-"}R$ {Math.abs(aposta.amount).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isWin ? "Ganhou" : "Aposta"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           )}
 

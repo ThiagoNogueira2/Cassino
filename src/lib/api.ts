@@ -129,7 +129,7 @@ export const wallet = {
 
 export const transactions = {
   list: (params?: {
-    type?: "deposit" | "withdraw" | "win";
+    type?: "deposit" | "withdraw" | "win" | "loss" | "bonus";
     status?: "approved" | "pending" | "rejected";
     page?: number;
     limit?: number;
