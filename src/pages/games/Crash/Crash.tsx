@@ -257,7 +257,6 @@ export default function CrashGame() {
           </Link>
 
           <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-          
             <div className="space-y-4">
              
               <div className="relative card-casino rounded-2xl border border-border overflow-hidden" style={{ minHeight: 340 }}>
@@ -266,7 +265,6 @@ export default function CrashGame() {
                   <CrashCanvas multiplier={multiplier} crashed={crashed} phase={phase} />
                 </div>
 
-              
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   {phase === "betting" ? (
                     <motion.div
