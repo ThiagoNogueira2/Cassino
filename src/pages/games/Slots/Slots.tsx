@@ -20,14 +20,22 @@ export default function SlotsGame() {
   const [autoSpin, setAutoSpin] = useState(false);
   const [autoCount, setAutoCount] = useState(0);
 
-  const { balance, addBalance, subtractBalance, addBet, addTransaction } = useBalance();
+  const { balance, addBalance, subtractBalance, addBet, addTransaction } =
+    useBalance();
   const { isLoggedIn, openAuth } = useAuth();
   const { toast } = useToast();
 
   const spin = async () => {
-    if (!isLoggedIn) { openAuth("login"); return; }
-    if (betAmount > balance) { toast({ title: "Saldo insuficiente", variant: "destructive" }); setAutoSpin(false); return; }
-    
+    if (!isLoggedIn) {
+      openAuth("login");
+      return;
+    }
+    if (betAmount > balance) {
+      toast({ title: "Saldo insuficiente", variant: "destructive" });
+      setAutoSpin(false);
+      return;
+    }
+
     subtractBalance(betAmount);
     setSpinning(true);
     setResult(null);
@@ -45,18 +53,41 @@ export default function SlotsGame() {
     if (outcome.win) {
       const prize = betAmount * outcome.multiplier;
       addBalance(prize);
-      addTransaction({ type: "win", amount: prize, status: "approved", description: `Ganho no Slot ${outcome.multiplier}x` });
-      addBet({ game: "Slot Machine", betAmount, result: outcome.multiplier, profit: prize - betAmount, outcome: "win" });
-      toast({ title: `🎰 ${outcome.message}`, description: `Você ganhou R$ ${prize.toFixed(2)}!` });
+      addTransaction({
+        type: "win",
+        amount: prize,
+        status: "approved",
+        description: `Ganho no Slot ${outcome.multiplier}x`,
+      });
+      addBet({
+        game: "Slot Machine",
+        betAmount,
+        result: outcome.multiplier,
+        profit: prize - betAmount,
+        outcome: "win",
+      });
+      toast({
+        title: `🎰 ${outcome.message}`,
+        description: `Você ganhou R$ ${prize.toFixed(2)}!`,
+      });
     } else {
-      addBet({ game: "Slot Machine", betAmount, result: 0, profit: -betAmount, outcome: "loss" });
+      addBet({
+        game: "Slot Machine",
+        betAmount,
+        result: 0,
+        profit: -betAmount,
+        outcome: "loss",
+      });
     }
   };
 
   // Auto spin
   useEffect(() => {
     if (!autoSpin || spinning) return;
-    if (autoCount <= 0) { setAutoSpin(false); return; }
+    if (autoCount <= 0) {
+      setAutoSpin(false);
+      return;
+    }
     const timer = setTimeout(() => {
       setAutoCount((c) => c - 1);
       spin();
@@ -71,7 +102,10 @@ export default function SlotsGame() {
 
       <div className="pt-16 pb-20 md:pb-4">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
 
@@ -80,25 +114,43 @@ export default function SlotsGame() {
             <div className="p-4 border-b border-border flex items-center justify-between bg-gradient-to-r from-amber-900/30 to-casino-card">
               <div>
                 <h1 className="text-xl font-black">🎰 Slot Machine</h1>
-                <p className="text-xs text-muted-foreground">RTP: 96% · Min R$0.10</p>
+                <p className="text-xs text-muted-foreground">
+                  RTP: 96% · Min R$0.10
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Saldo</p>
-                <p className="text-primary font-black">R$ {balance.toFixed(2)}</p>
+                <p className="text-primary font-black">
+                  R$ {balance.toFixed(2)}
+                </p>
               </div>
             </div>
 
-            {/* Reels */}
+            
             <div className="p-6">
               <div className="bg-casino-bg rounded-xl p-4 border border-border mb-4">
                 <div className="flex gap-2 justify-center">
                   {reels.map((reel, ri) => (
-                    <div key={ri} className="flex-1 bg-secondary rounded-lg overflow-hidden border border-border">
+                    <div
+                      key={ri}
+                      className="flex-1 bg-secondary rounded-lg overflow-hidden border border-border"
+                    >
                       {reel.map((symbol, si) => (
                         <motion.div
                           key={`${ri}-${si}`}
-                          animate={spinning ? { y: [0, 30, -30, 0], opacity: [1, 0.3, 0.3, 1] } : {}}
-                          transition={{ duration: 0.2, repeat: spinning ? Infinity : 0, delay: ri * 0.05 }}
+                          animate={
+                            spinning
+                              ? {
+                                  y: [0, 30, -30, 0],
+                                  opacity: [1, 0.3, 0.3, 1],
+                                }
+                              : {}
+                          }
+                          transition={{
+                            duration: 0.2,
+                            repeat: spinning ? Infinity : 0,
+                            delay: ri * 0.05,
+                          }}
                           className={`h-16 flex items-center justify-center text-3xl border-b border-border last:border-0 ${si === 1 ? "bg-primary/10" : ""}`}
                         >
                           {symbol}
@@ -108,13 +160,13 @@ export default function SlotsGame() {
                   ))}
                 </div>
 
-                {/* Win line indicator */}
+              
                 <div className="mt-2 h-0.5 bg-primary/30 relative">
                   <div className="absolute inset-y-0 -top-px left-0 right-0 h-0.5 bg-primary/60" />
                 </div>
               </div>
 
-              {/* Result */}
+            
               <AnimatePresence>
                 {result && (
                   <motion.div
@@ -124,18 +176,25 @@ export default function SlotsGame() {
                     className={`text-center py-3 rounded-xl mb-4 ${result.win ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}
                   >
                     {result.win ? (
-                      <p className="font-black text-lg">{result.message} · R$ {(betAmount * result.multiplier).toFixed(2)}</p>
+                      <p className="font-black text-lg">
+                        {result.message} · R${" "}
+                        {(betAmount * result.multiplier).toFixed(2)}
+                      </p>
                     ) : (
-                      <p className="font-bold">Sem sorte desta vez. Tente novamente!</p>
+                      <p className="font-bold">
+                        Sem sorte desta vez. Tente novamente!
+                      </p>
                     )}
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Bet controls */}
+              
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <label className="text-xs text-muted-foreground mb-1 block">Aposta (R$)</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    Aposta (R$)
+                  </label>
                   <div className="flex gap-1">
                     {[0.1, 0.5, 1, 5, 10, 25].map((v) => (
                       <button
@@ -159,14 +218,19 @@ export default function SlotsGame() {
                   {spinning ? (
                     <RefreshCw className="w-5 h-5 animate-spin" />
                   ) : (
-                    "🎰 Girar"
+                    "Girar"
                   )}
                 </Button>
                 <Button
                   variant="outline"
                   className={`border-border font-bold ${autoSpin ? "border-primary text-primary" : ""}`}
                   onClick={() => {
-                    if (autoSpin) { setAutoSpin(false); } else { setAutoCount(10); setAutoSpin(true); }
+                    if (autoSpin) {
+                      setAutoSpin(false);
+                    } else {
+                      setAutoCount(10);
+                      setAutoSpin(true);
+                    }
                   }}
                 >
                   <RotateCcw className="w-4 h-4 mr-1" />
@@ -177,7 +241,9 @@ export default function SlotsGame() {
 
             {/* Paytable */}
             <div className="p-4 border-t border-border bg-secondary/30">
-              <p className="text-xs font-bold text-muted-foreground uppercase mb-3">Tabela de Pagamentos</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase mb-3">
+                Tabela de Pagamentos
+              </p>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { combo: "💎 x5", mult: "50x", color: "text-primary" },
@@ -185,11 +251,20 @@ export default function SlotsGame() {
                   { combo: "💎 x4", mult: "15x", color: "text-primary" },
                   { combo: "Qualquer x5", mult: "10x", color: "text-primary" },
                   { combo: "Qualquer x4", mult: "5x", color: "text-primary" },
-                  { combo: "Qualquer x3", mult: "2x", color: "text-foreground" },
+                  {
+                    combo: "Qualquer x3",
+                    mult: "2x",
+                    color: "text-foreground",
+                  },
                 ].map((row) => (
-                  <div key={row.combo} className="flex items-center justify-between px-3 py-1.5 bg-secondary rounded-lg">
+                  <div
+                    key={row.combo}
+                    className="flex items-center justify-between px-3 py-1.5 bg-secondary rounded-lg"
+                  >
                     <span className="text-xs">{row.combo}</span>
-                    <span className={`text-xs font-black ${row.color}`}>{row.mult}</span>
+                    <span className={`text-xs font-black ${row.color}`}>
+                      {row.mult}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -202,4 +277,3 @@ export default function SlotsGame() {
     </div>
   );
 }
-

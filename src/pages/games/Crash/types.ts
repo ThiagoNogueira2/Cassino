@@ -1,2 +1,2 @@
-export type GamePhase = "betting" | "flying" | "crashed";
+export type GamePhase = "waiting" | "betting" | "flying" | "crashed";
 

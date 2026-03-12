@@ -25,4 +25,3 @@ export function CardComponent({ card }: CardComponentProps) {
     </motion.div>
   );
 }
-
